@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <title>2D-UI input test</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+
+<!-- Dependencies: Class / Framework -->
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<!-- Dependencies: jQuery plugins -->
+<script src="../lib/jquery.mousewheel.js"></script>
+<script src="../lib/jquery.hotkeys.js"></script>
+<script src="../lib/jgestures.min.js"></script> 		<!-- touch events -->
+<script src="../lib/signals.js"></script>				<!-- events -->
+<script src="../lib/hammer.js"></script>
+<!-- Dependencies: Libraries -->
+<script src="../lib/classy.js"></script>               	<!-- classes with proper inheritance -->
+<!-- Input SDK -->
+<script src="../src/InputAPI.js"></script>
+<!-- Touch input -->
+<script src="../src/InputTouchPlugin.js"></script>
+<!-- Gamepad -->
+<script src="../src/InputGamepadPlugin.js"></script>
+
+<!-- HTML -->
+<div id="input-console" style="top: 5px; left: 5px; background-color: #fff; color: #333; width: 100%; height: 100%; position: absolute; display: block; overflow: hidden; font-family: 'Trebuchet MS'; font-size: 12px;"></div>
+
+<!-- Script -->
+<script type="text/javascript">
+
+
+var inputAPI = new InputAPI({
+	//Give container for event registering. Not mandatory. Register can be done manually.
+	container: "#input-console"
+});
+
+inputAPI.mouseEvent.add(onMouseEvent);
+inputAPI.keyEvent.add(onKeyEvent);
+
+var touch = inputAPI.getPlugin("Touch");
+if (touch)
+{
+	touch.touchEvent.add(onTouchEvent);
+}
+var gamepad = inputAPI.getPlugin("Gamepad");
+if (gamepad)
+{
+
+	//Ask if gamepad is supported
+	if (gamepad.isBrowserSupported())
+	{
+		$('#input-console').prepend("<b style=\"color: black;\">Gamepad supported");
+	}
+	else
+	{
+		$('#input-console').prepend("<b style=\"color: black;\">Gamepad not supported");
+	}
+
+	gamepad.gamepadEvent.add(onGamepadEvent);
+	gamepad.gamepadStatusEvent.add(onGamepadStatusEvent);
+}
+
+
+
+function onTouchEvent (obj, event)
+{
+	if (obj.isMultiTouch)
+		$('#input-console').prepend("<b style=\"color: blue;\">MultiTouch: "+obj.type+"</b>: X="+obj.x+", Y="+obj.y+", RelativeX="+obj.relativeX+", RelativeY="+obj.relativeY+", Moved="+obj.distance+", rotate="+obj.angle+"<br>");
+	else
+		$('#input-console').prepend("<b style=\"color: green;\">Touch: "+obj.type+"</b>: X="+obj.x+", Y="+obj.y+", RelativeX="+obj.relativeX+", RelativeY="+obj.relativeY+", Moved="+obj.distance+", rotate="+obj.angle+"<br>");
+}
+
+function onKeyEvent(event)
+{
+	$('#input-console').prepend("<b style=\"color: blue;\">Key: "+event.key +" - "+event.type+"</b><br>");
+}
+
+function onMouseEvent(event)
+{
+	$('#input-console').prepend("<b style=\"color: red;\">Mouse: "+event.type+":</b> X="+event.x+", Y="+event.y+"<br>");
+}
+
+function onGamepadEvent(event)
+{
+	$('#input-console').prepend("<b style=\"color: black;\">Gamepad: </b>Buttons="+event.button[0].pressed+","+event.button[1].pressed+","+event.button[2].pressed+","+event.button[3].pressed+","+event.button[4].pressed+","+event.button[5].pressed+","+event.button[6].pressed+","+event.button[7].pressed+","+event.button[8].pressed+","+event.button[9].pressed+","+event.button[10].pressed+","+event.button[11].pressed+","+event.button[12].pressed+","+event.button[13].pressed+","+event.button[14].pressed+","+event.button[15].pressed+", Axis: "+event.axis[0].x+","+event.axis[0].y+","+event.axis[1].x+","+event.axis[1].y+"<br>");
+}
+
+function onGamepadStatusEvent(event)
+{
+	$('#input-console').prepend("<b style=\"color: black;\">Gamepad changed: "+event.gamepadid+"<br>");
+}
+
+
+</script>
+
+</body>
+</html>

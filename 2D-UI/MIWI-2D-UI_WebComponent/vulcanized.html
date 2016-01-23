@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Platform -->
+    <script src="bower_components/platform/platform.js"></script>
+    <!-- Polymer -->
+    <link rel="import" href="bower_components/polymer/polymer.html">
+    <!-- Use vulcanized file where all polymer components/css are formed in one html -file -->
+    <link rel="import" href="chat/polymer-chat-full.html">
+  </head>
+  <body>
+    <polymer-chat></polymer-chat>
+    <script>
+      //Simple example to use polymer with javascript
+      window.addEventListener('WebComponentsReady', function(e) {
+          var pchat = document.querySelector('polymer-chat');
+          pchat.clientusername = "User 1";
+          pchat.addUser("test", "1");
+          pchat.addUser("test2", "2");
+
+          //Connect to polymer fired event
+          pchat.addEventListener('chatmessage', function(e)
+          {
+              console.log("Event fired in polymer component : "+e.detail.uname+"-"+e.detail.message);
+          });
+
+          pchat.onServerMessage("ChatInfoMessage|Server:Message from server.");
+      });
+    </script>
+
+  </body>
+</html>

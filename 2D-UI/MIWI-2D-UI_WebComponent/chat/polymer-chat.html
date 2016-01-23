@@ -1,0 +1,237 @@
+﻿<link rel="import" href="polymer-collapse.html">
+
+<polymer-element name="polymer-chat" constructor="PolymerChat">
+  <template>
+	<link rel="stylesheet" href="polymer-chat.css">
+	<div id="chat-messages">
+		<template id="messages" repeat="{{ chatmessages }}">
+			<span style="font-family:Courier New;font-size:9pt;color:rgb(20,20,20);">[{{ time }}] </span> <span style="font-weight:bold;color:#3251FF;">{{ username }}</span><span style="font-weight:bold;color:#FF1C14;">{{ username2 }}</span> {{ message }}<br>
+		</template>
+	</div>
+	<div id="chat-members">
+		<ul>
+		<template id="members" repeat="{{ chatmembers }}">
+			<li on-click="{{clickMember}}"><span style="font-weight: {{ fontweight }};">{{ username }}</span></li>
+		</template>
+		</ul>
+	</div>
+	<div id="floaties">
+		<template id="floatmsgs" repeat="{{ floatingmessages }}">
+			<div class="floatie" id="fl{{ index }}"><span style="color: rgb(50,100,255);">{{ username }}</span><span style="color: rgb(255,32,12);">{{ username2 }}</span> {{ message }}</div><br>
+		</template>
+	</div>
+	<div id="chat-functions">
+		<input id="chat-input" on-keypress="{{sendMessage}}" value="{{chat}}" placeholder="Write new chat message here...">
+		<button on-click="{{showMessages}}" class="button_messages" title="Show chat messages">&nbsp;</button>
+		<button on-click="{{showMembers}}" class="button_members" title="Show chat members">&nbsp;</button>
+	</div>
+	<polymer-collapse id="collapse1" closed="true" fixedsize="" targetid="chat-messages"></polymer-collapse>
+	<polymer-collapse id="collapse2" closed="true" fixedsize="" targetid="chat-members"></polymer-collapse>
+  </template>
+  <script>
+
+// Chat Message types
+var MSG_CHAT_TYPE_CHAT_MESSAGE          = "ChatMessage";
+var MSG_CHAT_TYPE_INFORMATION           = "ChatInfoMessage";
+
+Polymer('polymer-chat', {
+  chat: "",
+  chatmessages: [], //{time: "time", username: "username", username2: "username", message: "message"} //Username2 for different color of other members
+  floatingmessages: [], //{index: 0, username: "test1", username2: "", message: "message"}
+  floatingtime: 0,
+  clientconnid: "",
+  clientusername: "",
+  lastsender: "",
+  chatmembers: [], //{connectionId: "1", username: 'MyUsername', fontweight: 'normal'}. fontweight for styling the li element
+  showMessages: function()
+  {
+    this.$.collapse1.toggle();
+    if (!this.$.collapse1.closed)
+      this.floatingmessages = []; //Clear floating messages
+  },
+
+  showMembers: function()
+  {
+    this.$.collapse2.toggle();
+  },
+
+  addUser: function(uname, connid)
+  {
+    if (connid ===  this.clientconnid)
+      this.chatmembers.push({connectionId: connid, username: uname, fontweight: 'bold'});
+    else
+      this.chatmembers.push({connectionId: connid, username: uname, fontweight: 'normal'});
+  },
+
+  removeUser: function(uname, connid)
+  {
+    var index = -1;
+    for(var i = 0; i < this.chatmembers.length; i++)
+    {
+      if (this.chatmembers[i].connectionId === connid)
+      {
+        index = i;
+        break;
+      }
+    }
+    if (index > -1)
+      this.chatmembers.splice(index, 1);
+  },
+
+  onServerMessage: function(fullMsg)
+  {
+    var msgType = fullMsg.split("|")[0];
+
+    var currentdate = new Date();
+    var dateStr = this.checkTimeFormat(currentdate.getHours()) + ":" + this.checkTimeFormat(currentdate.getMinutes()) + ":" + this.checkTimeFormat(currentdate.getSeconds());
+
+    if (msgType == MSG_CHAT_TYPE_CHAT_MESSAGE)
+    {
+      var msg = fullMsg.split("|")[1];
+      var uname = msg.split(":")[0];
+      var messg = unescape(msg.split(":")[1]);
+      var uname1 = uname;
+      var uname2 = "";
+
+      if (uname == this.clientusername)
+        uname1 = uname;
+      else
+        uname2 = uname;
+
+      if (uname != this.lastsender)
+      {
+        this.lastsender = uname;
+        uname1 = "";
+        uname2 = "";
+      }
+      this.addChatMessage(dateStr, uname1, uname2, messg);
+      if (this.$.collapse1.closed)
+        this.createFloatie(uname, messg, true);
+
+    }
+    else if (msgType == MSG_CHAT_TYPE_INFORMATION)
+    {
+
+      var infoMessage = fullMsg.split("|")[1];
+      this.addChatMessage(dateStr, "", "", infoMessage);
+      if (this.$.collapse1.closed)
+        this.createFloatie(null, infoMessage, false);
+
+    }
+  },
+
+  addChatMessage : function(datestr, uname1, uname2, msg)
+  {
+      if (this.chatmessages.length >= 8)
+      {
+          this.chatmessages.splice(0, 1);
+      }
+      this.chatmessages.push({time: datestr, username: uname1, username2: uname2, message: msg});
+  },
+
+  createFloatie: function(uname, msg, isMessage)
+  {
+    var username = "";
+    var username2 = "";
+    var indx = this.floatingmessages.length + 1;
+    if (isMessage)
+    {
+      if (uname == this.clientusername)
+      {
+        this.floatingmessages.push({index: indx, username: uname, username2: "", message: msg });
+      }
+      else
+      {
+        this.floatingmessages.push({index: indx, username: "", username2: uname, message: msg });
+      }
+    }
+    else
+    {
+      this.floatingmessages.push({index: indx, username: "", username2: "", message: msg });
+    }
+
+    this.async(this.hideFloatingMessage, indx, 15000);
+
+    // Cap messages to 15
+    if (this.floatingmessages.length > 15)
+    {
+      this.floatingtime = 20.0;
+      this.onUpdate(0);
+    }
+
+    //this.onWindowResize();
+
+    if (!isMessage || !this.$.collapse1.closed || uname === this.clientusername)
+      return;
+
+  },
+
+  hideFloatingMessage: function(indx)
+  {
+    var rindex = -1;
+    for(var i = 0; i < this.floatingmessages.length; i++)
+    {
+      if (this.floatingmessages[i].index === indx)
+      {
+        rindex = i;
+        break;
+      }
+    }
+    if (rindex > -1)
+      this.floatingmessages.splice(rindex, 1);
+  },
+
+  onUpdate: function(frametime)
+  {
+    if (this.floatingmessages.length > 0)
+    {
+      this.floatingtime += frametime;
+      if (this.floatingtime >= 15.0)
+      {
+        this.floatingtime = 0.0;
+      }
+    }
+  },
+
+  clickMember: function(event, detail, target)
+  {
+    console.log(target.templateInstance.model.connectionId);
+    console.log(target.templateInstance.model.username);
+  },
+
+  onBlur: function()
+  {
+    $("#chat-input").blur();
+  },
+
+  sendMessage: function(event, detail, sender)
+  {
+    if (event.keyCode == 13) //Enter pressed
+    {
+      //Fire new event for server/backend to catch
+      var message = this.chat;
+      this.fire("chatmessage", {uname: this.clientusername, message: message});
+      this.chat = "";
+      //Add to chat messages
+      var currentdate = new Date();
+      var dateStr = this.checkTimeFormat(currentdate.getHours()) + ":" + this.checkTimeFormat(currentdate.getMinutes()) + ":" + this.checkTimeFormat(currentdate.getSeconds());
+      this.addChatMessage(dateStr, this.clientusername, "", message);
+
+      if (this.$.collapse1.closed)
+        this.showMessages();
+    }
+  },
+
+  checkTimeFormat : function(num)
+  {
+    return (num > 10 ? num.toString() : "0" + num.toString());
+  },
+
+  ready : function()
+  {
+    console.log("Polymer Chat is ready!");
+  }
+});
+
+  </script>
+</polymer-element>

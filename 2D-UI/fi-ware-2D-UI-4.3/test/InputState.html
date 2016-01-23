@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+<head>
+    <title>2D-UI input abstraction test</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+
+<!-- jQuery  -->
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<!-- Dependencies: jQuery plugins -->
+<script src="../lib/jquery.mousewheel.js"></script>
+<script src="../lib/jquery.hotkeys.js"></script>
+<script src="../lib/jgestures.min.js"></script> 		<!-- touch events -->
+<script src="../lib/signals.js"></script>				<!-- events -->
+<!-- Dependencies: Libraries -->
+<script src="../lib/classy.js"></script>               	<!-- classes with proper inheritance -->
+<!-- Input SDK -->
+<script src="../src/InputAPI.js"></script>
+<!-- InputState -->
+<script src="../src/InputState.js"></script>
+
+<style>
+.txt
+{
+  display: inline-block;
+  padding: 3px;
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.2;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+       -o-user-select: none;
+  width: 95%;
+}
+</style>
+
+<!-- HTML -->
+<div id="input-state" style="top: 5px; left: 5px; background-color: #fff; color: #333; width: 300px; height: 100%; position: absolute; display: block; overflow: hidden; font-family: 'Trebuchet MS'; font-size: 12px; border-right: 1px solid #c0c0c0;">
+<span id="is-header"><b>Create input state</b></span><br>
+<span id="is-error" style="color: red;"></span><br>
+<input type="text" id="isname" name="isname" value="" placeholder="Name..." class="txt"><br>
+<input type="text" id="iskeybindings" name="iskeybindings" placeholder="Key bindings comma separated..." class="txt"><br>
+<select class="txt" id="ismousedown">
+	<option value="-1" style="color: #c0c0c0;">No mouse down </option>
+	<option value="1">Left down</option>
+	<option value="3">Middle down</option>
+	<option value="2">Right down</option>
+</select>
+<input type="text" id="istimeslot" name="istimeslot" placeholder="Time slot 0 - 5000 milliseconds..." class="txt"><br>
+<input type="text" id="ispriority" name="ispriority" placeholder="Priority 0 - 100..." class="txt"><br>
+<input type="text" id="ismultiplier" name="ismultiplier" placeholder="Repeat state within time slot 1-n" class="txt"><br>
+<input type="submit" name="Save" value="Save" onclick="createInputState();">
+</div>
+<div id="input-console" style="top: 5px; left: 310px; background-color: #fff; color: #333; width: 100%; height: 100%; position: absolute; display: block; overflow: hidden; font-family: 'Trebuchet MS'; font-size: 12px;"></div>
+
+<!-- Script -->
+<script type="text/javascript">
+
+var inputAPI = new InputAPI({
+	//Give container for event registering. Not mandatory. Register can be done manually.
+	container: "#input-console"
+});
+
+var inputState = null;
+
+function createInputState()
+{
+
+	//Clear error
+	$("#is-error").html("");
+
+	var nm = $("#isname").val();
+	var kb = $("#iskeybindings").val();
+	var md = $("#ismousedown").val();
+	var ts = $("#istimeslot").val();
+	var pr = $("#ispriority").val();
+	var mp = $("#ismultiplier").val();
+	var keyset = false;
+	var mouseset = false;
+
+	if (nm.trim().length == 0)
+	{
+		$("#is-error").html("Please, write name");
+		return false;
+	}
+
+	if (md == 1 || md == 2 || md == 3)
+	{
+		mouseset = true;
+	}
+
+	var tsval = parseInt(ts);
+	if (isNaN(tsval))
+		tsval = 0;
+
+	if (isNaN(tsval) || (tsval < 0 || tsval > 5000))
+	{
+		$("#is-error").html("Write time slot between 0 and 5000");
+		return false;
+	}
+
+	var prval = parseInt(pr);
+	if (isNaN(prval))
+	{
+		prval = 100;
+	}
+	if (prval < 0 || prval > 100)
+	{
+		$("#is-error").html("Write priority between 0 and 100");
+		return false;
+	}
+
+	var mpval = parseInt(mp);
+	if (isNaN(mpval))
+		mpval = 0;
+
+	if (mpval < 0 || mpval > 5)
+	{
+		$("#is-error").html("Write multiplier between 0 and 5");
+		return false;
+	}
+	if ((mpval > 0 && mpval <= 5) && tsval <= 0)
+	{
+		$("#is-error").html("Give time slot if multiplier is set");
+		return false;
+	}
+
+	if (kb.length == 0)
+	{
+		kb = [];
+	}
+	else
+	{
+		//Split
+		var res = kb.split(",");
+		kb = [];
+		for (var i = 0; i < res.length; i++) {
+			kb.push(res[i]);
+		}
+
+		keyset = true;
+	}
+
+	if (keyset && mouseset && mpval > 0)
+	{
+		$("#is-error").html("Multiplier is not applicable if both key and mouse conditions are set");
+		return false;
+	}
+
+	if (keyset == false && mouseset == false)
+	{
+		$("#is-error").html("Please set either key bindings or mouse condition.");
+		return false;
+	}
+
+	if (inputState)
+	{
+		//Update
+		inputState.setName(nm.trim());
+		inputState.setKeyBindings(kb);
+		inputState.setMouseDown(md);
+		inputState.setTimeslot(tsval);
+		inputState.setPriority(prval);
+		inputState.setMultiplier(mpval)
+		inputAPI.updateInputState(inputState);
+
+	}
+	else
+	{
+
+		inputState = new InputState ({
+			name : nm,
+			keyBindings : kb,
+			mouseDown : md,
+			timeslot : tsval,
+			priority : prval,
+			multiplier : mpval
+		});
+
+		var inputStateSignal = inputAPI.registerInputState(inputState);
+		if (inputStateSignal)
+		{
+			inputStateSignal.add(onInputSignal);
+			$("#is-header").html("<b>Update input state</b>");
+			$("#isname").prop('disabled', true);
+		}
+		else
+		{
+			$('#input-console').prepend("<b style=\"color: red;\">InputState has invalid values. Please check browser console.");
+		}
+
+	}
+}
+
+function onKeyEvent(event)
+{
+	$('#input-console').prepend("<b style=\"color: blue;\">Key: "+event.key +" - "+event.type+"</b><br>");
+}
+
+function onInputSignal(event)
+{
+	$('#input-console').prepend("<b style=\"color: olive;\">InputState "+inputState.name+" fired!<br>");
+}
+
+</script>
+
+</body>
+</html>

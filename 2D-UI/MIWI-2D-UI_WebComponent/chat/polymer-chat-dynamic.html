@@ -1,0 +1,566 @@
+<polymer-element name="polymer-collapse" attributes="targetId target horizontal closed duration fixedSize size" assetpath="/">
+  <template>
+    <style polymer-scope="controller">/*
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+*/
+.polymer-collapse-closed {
+  display: none;
+}</style>
+    <style>/*
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+*/
+.polymer-collapse-closed {
+  display: none;
+}</style>
+    <style>
+      @host {
+        * {
+          display: none;
+        }
+      }
+    </style>
+  </template>
+  <script>
+    Polymer('polymer-collapse', {
+      /**
+       * The id of the target element.
+       *
+       * @attribute targetId
+       * @type string
+       * @default ''
+       */
+      targetId: '',
+      /**
+       * The target element.
+       *
+       * @attribute target
+       * @type object
+       * @default null
+       */
+      target: null,
+      /**
+       * If true, the orientation is horizontal; otherwise is vertical.
+       *
+       * @attribute horizontal
+       * @type boolean
+       * @default false
+       */
+      horizontal: false,
+      /**
+       * If true, the target element is hidden/collapsed.
+       *
+       * @attribute closed
+       * @type boolean
+       * @default false
+       */
+      closed: false,
+      /**
+       * Collapsing/expanding animation duration in second.
+       *
+       * @attribute duration
+       * @type number
+       * @default 0.33
+       */
+      duration: 0.33,
+      /**
+       * If true, the size of the target element is fixed and is set
+       * on the element.  Otherwise it will try to
+       * use auto to determine the natural size to use
+       * for collapsing/expanding.
+       *
+       * @attribute fixedSize
+       * @type boolean
+       * @default false
+       */
+      fixedSize: false,
+      size: null,
+      enteredView: function() {
+        this.installControllerStyles();
+        this.inDocument = true;
+        this.async(function() {
+          this.afterInitialUpdate = true;
+        });
+      },
+      leftView: function() {
+        this.removeListeners(this.target);
+      },
+      targetIdChanged: function() {
+        var p = this.parentNode;
+        while (p.parentNode) {
+          p = p.parentNode;
+        }
+        this.target = p.querySelector('#' + this.targetId);
+      },
+      targetChanged: function(old) {
+        if (old) {
+          this.removeListeners(old);
+        }
+        this.horizontalChanged();
+        this.isTargetReady = !!this.target;
+        if (this.target) {
+          this.target.style.overflow = 'hidden';
+          this.addListeners(this.target);
+          // set polymer-collapse-closed class initially to hide the target
+          this.toggleClosedClass(true);
+        }
+        // don't need to update if the size is already set and it's opened
+        if (!this.fixedSize || !this.closed) {
+          this.update();
+        }
+      },
+      addListeners: function(node) {
+        this.transitionEndListener = this.transitionEndListener ||
+            this.transitionEnd.bind(this);
+        node.addEventListener('webkitTransitionEnd', this.transitionEndListener);
+        node.addEventListener('transitionend', this.transitionEndListener);
+      },
+      removeListeners: function(node) {
+        node.removeEventListener('webkitTransitionEnd', this.transitionEndListener);
+        node.removeEventListener('transitionend', this.transitionEndListener);
+      },
+      horizontalChanged: function() {
+        this.dimension = this.horizontal ? 'width' : 'height';
+      },
+      closedChanged: function() {
+        this.update();
+      },
+      /**
+       * Toggle the closed state of the collapsible.
+       *
+       * @method toggle
+       */
+      toggle: function() {
+        this.closed = !this.closed;
+      },
+      setTransitionDuration: function(duration) {
+        var s = this.target.style;
+        s.webkitTransition = s.transition = duration ?
+            (this.dimension + ' ' + duration + 's') : null;
+        if (duration === 0) {
+          this.async('transitionEnd');
+        }
+      },
+      transitionEnd: function() {
+        if (!this.closed && !this.fixedSize) {
+          this.updateSize('auto', null);
+        }
+        this.setTransitionDuration(null);
+        this.toggleClosedClass(this.closed);
+      },
+      toggleClosedClass: function(add) {
+        this.hasClosedClass = add;
+        this.target.classList.toggle('polymer-collapse-closed', add);
+      },
+      updateSize: function(size, duration, forceEnd) {
+        if (duration) {
+          this.calcSize();
+        }
+        this.setTransitionDuration(duration);
+        var s = this.target.style;
+        var nochange = s[this.dimension] === size;
+        s[this.dimension] = size;
+        // transitonEnd will not be called if the size has not changed
+        if (forceEnd && nochange) {
+          this.transitionEnd();
+        }
+      },
+      update: function() {
+        if (!this.target || !this.inDocument) {
+          return;
+        }
+        if (!this.isTargetReady) {
+          this.targetChanged();
+        }
+        this.horizontalChanged();
+        this[this.closed ? 'hide' : 'show']();
+      },
+      calcSize: function() {
+        return this.target.getBoundingClientRect()[this.dimension] + 'px';
+      },
+      getComputedSize: function() {
+        return getComputedStyle(this.target)[this.dimension];
+      },
+      show: function() {
+        this.toggleClosedClass(false);
+        // for initial update, skip the expanding animation to optimize
+        // performance e.g. skip calcSize
+        if (!this.afterInitialUpdate) {
+          this.transitionEnd();
+          return;
+        }
+        if (!this.fixedSize) {
+          this.updateSize('auto', null);
+          var s = this.calcSize();
+          this.updateSize(0, null);
+        }
+        this.async(function() {
+          this.updateSize(this.size || s, this.duration, true);
+        });
+      },
+      hide: function() {
+        // don't need to do anything if it's already hidden
+        if (this.hasClosedClass && !this.fixedSize) {
+          return;
+        }
+        if (this.fixedSize) {
+          // save the size before hiding it
+          this.size = this.getComputedSize();
+        } else {
+          this.updateSize(this.calcSize(), null);
+        }
+        this.async(function() {
+          this.updateSize(0, this.duration);
+        });
+      }
+    });
+  </script>
+</polymer-element>
+
+ï»¿
+<polymer-element name="polymer-chat" constructor="PolymerChat" assetpath="/">
+  <template>
+
+	<style>#chat-messages
+{
+	background-color: rgba(247, 247, 247, 0.8);
+	transform-origin: bottom;
+	height: 148px;
+	width: 398px;
+	border: 1px solid #999999;
+	z-index: 10001;
+	position: absolute;
+	bottom: 30px;
+	left: 0;
+    font-family: "Arial";
+    font-size: 11pt;
+}
+
+#chat-members
+{
+	background-color: rgba(247, 247, 247, 0.8);
+	height: 148px;
+	width: 198px;
+	transform-origin: bottom;
+	border: 1px solid #999999;
+	z-index: 10001;
+	position: absolute;
+	bottom: 30px;
+	margin-left: 399px;
+    font-family: "Arial";
+    font-size: 11pt;
+}
+
+#chat-functions
+{
+	z-index: 10001;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 599px;
+	min-height: 25px;
+	padding-top: 2px;
+	background-color: #ffffff;
+}
+
+#chat-input
+{
+	width: 325px;
+	padding-left: 24px;
+	margin-left: 10px;
+	height: 20px;
+	background: url(http://localhost/polymer/chat/icon_chat_write.jpg) left no-repeat;
+	border: 1px solid #999999;
+}
+
+#floaties
+{
+	z-index: 10001;
+	border: 0px;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	position: absolute;
+	width: auto;
+	font-family: "Arial";
+	font-size: 11pt;
+	color: rgb(56,56,56);
+	bottom: 26px;
+	left: 5px;
+	min-height: 30px;
+}
+
+.floatie
+{
+	z-index: 10001;
+	border: 0px;
+	-moz-border-radius:4px; -webkit-border-radius:4px; border-radius:4px;
+	padding: 3px 5px 3px 5px;
+	margin-bottom: 2px;
+	width: auto;
+	font-family: "Arial";
+	font-size: 11pt;
+	color: rgb(56,56,56);
+	background-color: rgba(248, 248, 248, 0.7);
+	display: inline-block;
+}
+
+.button_messages
+{
+	width: 34px;
+	height: 22px;
+	border: none;
+	background-image: url(http://localhost/polymer/chat/icon_chat_messages.jpg);
+}
+
+.button_members
+{
+	width: 36px;
+	height: 22px;
+	border: none;
+	background-image: url(http://localhost/polymer/chat/icon_chat_members.jpg);
+	margin-left: 4px;
+}
+
+ul
+{
+	list-style:none;
+	margin: 0px;
+	padding: 5px;
+}</style>
+	<div id="chat-messages">
+		<template id="messages" repeat="{{ chatmessages }}">
+			<span style="font-family:Courier New;font-size:9pt;color:rgb(20,20,20);">[{{ time }}] </span> <span style="font-weight:bold;color:#3251FF;">{{ username }}</span><span style="font-weight:bold;color:#FF1C14;">{{ username2 }}</span> {{ message }}<br>
+		</template>
+	</div>
+	<div id="chat-members">
+		<ul>
+		<template id="members" repeat="{{ chatmembers }}">
+			<li on-click="{{clickMember}}"><span style="font-weight: {{ fontweight }};">{{ username }}</span></li>
+		</template>
+		</ul>
+	</div>
+	<div id="floaties">
+		<template id="floatmsgs" repeat="{{ floatingmessages }}">
+			<div class="floatie" id="fl{{ index }}"><span style="color: rgb(50,100,255);">{{ username }}</span><span style="color: rgb(255,32,12);">{{ username2 }}</span> {{ message }}</div><br>
+		</template>
+	</div>
+	<div id="chat-functions">
+		<input id="chat-input" on-keypress="{{sendMessage}}" value="{{chat}}" placeholder="Write new chat message here and press...">
+		<button on-click="{{showMessages}}" class="button_messages" title="Show chat messages">&nbsp;</button>
+		<button on-click="{{showMembers}}" class="button_members" title="Show chat members">&nbsp;</button>
+	</div>
+	<polymer-collapse id="collapse1" closed="true" fixedsize="" targetid="chat-messages"></polymer-collapse>
+	<polymer-collapse id="collapse2" closed="true" fixedsize="" targetid="chat-members"></polymer-collapse>
+  </template>
+  <script>
+
+// Chat Message types
+var MSG_CHAT_TYPE_CHAT_MESSAGE          = "ChatMessage";
+var MSG_CHAT_TYPE_INFORMATION           = "ChatInfoMessage";
+
+Polymer('polymer-chat', {
+  chat: "",
+  chatmessages: [], //{time: "time", username: "username", username2: "username", message: "message"} //Username2 for different color of other members
+  floatingmessages: [], //{index: 0, username: "test1", username2: "", message: "message"}
+  floatingtime: 0,
+  clientconnid: "",
+  clientusername: "",
+  lastsender: "",
+  chatmembers: [], //{connectionId: "1", username: 'MyUsername', fontweight: 'normal'}. fontweight for styling the li element
+  showMessages: function()
+  {
+    this.$.collapse1.toggle();
+    if (!this.$.collapse1.closed)
+      this.floatingmessages = []; //Clear floating messages
+  },
+
+  showMembers: function()
+  {
+    this.$.collapse2.toggle();
+  },
+
+  addUser: function(uname, connid)
+  {
+    if (connid ===  this.clientconnid)
+      this.chatmembers.push({connectionId: connid, username: uname, fontweight: 'bold'});
+    else
+      this.chatmembers.push({connectionId: connid, username: uname, fontweight: 'normal'});
+  },
+
+  removeUser: function(uname, connid)
+  {
+    var index = -1;
+    for(var i = 0; i < this.chatmembers.length; i++)
+    {
+      if (this.chatmembers[i].connectionId === connid)
+      {
+        index = i;
+        break;
+      }
+    }
+    if (index > -1)
+      this.chatmembers.splice(index, 1);
+  },
+
+  onServerMessage: function(fullMsg)
+  {
+    var msgType = fullMsg.split("|")[0];
+
+    var currentdate = new Date();
+    var dateStr = this.checkTimeFormat(currentdate.getHours()) + ":" + this.checkTimeFormat(currentdate.getMinutes()) + ":" + this.checkTimeFormat(currentdate.getSeconds());
+
+    if (msgType == MSG_CHAT_TYPE_CHAT_MESSAGE)
+    {
+      var msg = fullMsg.split("|")[1];
+      var uname = msg.split(":")[0];
+      var messg = unescape(msg.split(":")[1]);
+      var uname1 = uname;
+      var uname2 = "";
+
+      if (uname == this.clientusername)
+        uname1 = uname;
+      else
+        uname2 = uname;
+
+      if (uname != this.lastsender)
+      {
+        this.lastsender = uname;
+        uname1 = "";
+        uname2 = "";
+      }
+      this.addChatMessage(dateStr, uname1, uname2, messg);
+      if (this.$.collapse1.closed)
+        this.createFloatie(uname, messg, true);
+
+    }
+    else if (msgType == MSG_CHAT_TYPE_INFORMATION)
+    {
+
+      var infoMessage = fullMsg.split("|")[1];
+      this.addChatMessage(dateStr, "", "", infoMessage);
+      if (this.$.collapse1.closed)
+        this.createFloatie(null, infoMessage, false);
+
+    }
+  },
+
+  addChatMessage : function(datestr, uname1, uname2, msg)
+  {
+      if (this.chatmessages.length >= 8)
+      {
+          this.chatmessages.splice(0, 1);
+      }
+      this.chatmessages.push({time: datestr, username: uname1, username2: uname2, message: msg});
+  },
+
+  createFloatie: function(uname, msg, isMessage)
+  {
+    var username = "";
+    var username2 = "";
+    var indx = this.floatingmessages.length + 1;
+    if (isMessage)
+    {
+      if (uname == this.clientusername)
+      {
+        this.floatingmessages.push({index: indx, username: uname, username2: "", message: msg });
+      }
+      else
+      {
+        this.floatingmessages.push({index: indx, username: "", username2: uname, message: msg });
+      }
+    }
+    else
+    {
+      this.floatingmessages.push({index: indx, username: "", username2: "", message: msg });
+    }
+
+    this.async(this.hideFloatingMessage, indx, 15000);
+
+    // Cap messages to 15
+    if (this.floatingmessages.length > 15)
+    {
+      this.floatingtime = 20.0;
+      this.onUpdate(0);
+    }
+
+    //this.onWindowResize();
+
+    if (!isMessage || !this.$.collapse1.closed || uname === this.clientusername)
+      return;
+
+  },
+
+  hideFloatingMessage: function(indx)
+  {
+    var rindex = -1;
+    for(var i = 0; i < this.floatingmessages.length; i++)
+    {
+      if (this.floatingmessages[i].index === indx)
+      {
+        rindex = i;
+        break;
+      }
+    }
+    if (rindex > -1)
+      this.floatingmessages.splice(rindex, 1);
+  },
+
+  onUpdate: function(frametime)
+  {
+    if (this.floatingmessages.length > 0)
+    {
+      this.floatingtime += frametime;
+      if (this.floatingtime >= 15.0)
+      {
+        this.floatingtime = 0.0;
+      }
+    }
+  },
+
+  clickMember: function(event, detail, target)
+  {
+    console.log(target.templateInstance.model.connectionId);
+    console.log(target.templateInstance.model.username);
+  },
+
+  onBlur: function()
+  {
+    $("#chat-input").blur();
+  },
+
+  sendMessage: function(event, detail, sender)
+  {
+    if (event.keyCode == 13) //Enter pressed
+    {
+      //Fire new event for server/backend to catch
+      var message = this.chat;
+      this.fire("chatmessage", {uname: this.clientusername, message: message});
+      this.chat = "";
+      //Add to chat messages
+      var currentdate = new Date();
+      var dateStr = this.checkTimeFormat(currentdate.getHours()) + ":" + this.checkTimeFormat(currentdate.getMinutes()) + ":" + this.checkTimeFormat(currentdate.getSeconds());
+      this.addChatMessage(dateStr, this.clientusername, "", message);
+
+      if (this.$.collapse1.closed)
+        this.showMessages();
+    }
+  },
+
+  checkTimeFormat : function(num)
+  {
+    return (num > 10 ? num.toString() : "0" + num.toString());
+  },
+
+  ready : function()
+  {
+    console.log("Polymer Chat is ready!");
+    this.fire("polymerchatready");
+  }
+});
+
+  </script>
+</polymer-element>

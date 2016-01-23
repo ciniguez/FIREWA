@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>Graph Nvd3 Angular</title>
+<!--Agrego libreria gráfica d3.js, Angular y nvd3 (respetar orden)-->
+		<script src="js/angular.js"></script>
+		<script src="js/d3.js" charset="utf-8"></script>
+		<script src="js/nv.d3.js" charset="utf-8"></script>
+		<script src="js/angular-nvd3.js" charset="UTF-8"></script>
+		<script src="js/main.js" charset="UTF-8"></script>
+		<!-- Estilos -->
+		<link href="css/nv.d3.css" rel="stylesheet">
+		<link href="css/styles.css" rel="stylesheet">
+	</head>
+	<body>
+		<div ng-app="myApp">
+			<div ng-controller="myCtrl">
+				<nvd3 options="options" data="data"></nvd3>
+			</div>
+		</div>
+		
+		
+		<!-- JS -->
+		<script type="text/javascript" src="js/main.js"></script>
+	</body>
+</html>

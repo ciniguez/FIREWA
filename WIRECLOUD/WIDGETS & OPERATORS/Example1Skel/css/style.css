@@ -1,0 +1,109 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: sans-serif;
+    color: #333;
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white url("../images/loading.gif") no-repeat center center;
+    z-index: 3;
+}
+
+.hide {
+    display: none;
+}
+
+h1 {
+    padding: 0 1ex;
+    margin: 1ex 0;
+    font-size: 14pt;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.forecast > div {
+    border-top: 1px solid #BEBEBE;
+    box-shadow: 0 0 5px 1px rgba(255,255,255,0.8);
+    white-space: nowrap;
+    font-size: 9pt;
+}
+
+.forecast > div > .block {
+    display: inline-block;
+    padding: 1ex;
+    vertical-align: top;
+    background: url("../images/tickDownMed.png") no-repeat top left;
+}
+
+.forecast > div > .block:first-child {
+    background: transparent;
+}
+
+.forecast > div > .block .title, .forecast > div > .block .subtitle {
+    color: #666;
+    font-size: 90%;
+}
+
+.forecast > div > .block .title {
+    margin: 1ex 0;
+}
+
+#current_status_icon {
+    border: 1px solid #BEBEBE;
+    vertical-align: top;
+}
+
+#current_status_label {
+    margin: 1ex;
+    display: inline-block;
+    font-weight: bold;
+}
+
+#current_temp {
+    font-size: 200%;
+    font-weight: bold;
+}
+
+.forecast > .nextdays > div {
+    width: 7em;
+}
+
+.forecast > .nextdays .status_icon {
+    border: 1px solid #BEBEBE;
+    vertical-align: middle;
+    height: 22px;
+    width: 22px;
+}
+
+.forecast > .nextdays .temp {
+    vertical-align: middle;
+}
+
+.forecast > .nextdays .status_label {
+    font-size: 90%;
+    margin: 1ex 0;
+    white-space: normal;
+}
+
+/* Boostrap-like classes */
+.alert {
+    margin: 2ex;
+    padding: 8px 35px 8px 14px;
+    border-radius: 4px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    background: #fcf8e3;
+    border: 1px solid #fbeed5;
+    color: #c09853;
+}
+
+.alert.alert-info {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}

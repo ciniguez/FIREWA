@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>Tabla de Datos</title>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="https://cdn.rawgit.com/angular-ui/bower-ui-grid/master/ui-grid.min.css"/>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular-touch.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular-animate.js"></script>
+		<script src="http://ui-grid.info/docs/grunt-scripts/csv.js"></script>
+		<script src="http://ui-grid.info/docs/grunt-scripts/pdfmake.js"></script>
+		<script src="http://ui-grid.info/docs/grunt-scripts/vfs_fonts.js"></script>
+		<script src="https://cdn.rawgit.com/angular-ui/bower-ui-grid/master/ui-grid.min.js"></script>
+		<link href="css/style.css" rel="stylesheet">
+	</head>
+	<body>
+		<div ng-app="moduleTabla">
+			<div ng-controller="MainCtrl">
+			<div id="grid1" ui-grid="{ data: myData }" class="grid"></div>
+		</div>
+		</div>
+		<script src="js/main.js"></script>
+	</body>
+</html>

@@ -1,0 +1,15 @@
+{
+    "name": "2D-UI API",
+    "description": "API reference of the 2D-UI GE, part of FIWARE Advanced WebUI chapter",
+    "version": "4.3",
+    "url": "http://catalogue.fiware.org/enablers/2d-ui",
+    "options": {
+        "paths"           : "src/",
+        "outdir"          : "build/doc",
+        "nocode"          : true,
+        "linkNatives"     : true,
+        "attributesEmit"  : false,
+        "selleck"         : false,
+        "tabtospace"      : 4
+    }
+}

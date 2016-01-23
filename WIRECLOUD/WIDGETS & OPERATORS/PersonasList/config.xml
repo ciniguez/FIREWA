@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="listarItems" version="1.0.0">
+	<details>
+		<title>Disease Diagnosis Example</title>
+		<homepage>https://github.com/wirecloud-fiware/quick-start-development-tutorial</homepage>
+		<authors>Carlos Iniguez</authors>
+		<contributors>Carlos Iniguez</contributors>
+		<email>carlos.iniguez79@gmail.com</email>
+		<image>images/usuarios.png</image><!-- 170x80 -->
+		<description>Listar resultados en forma de tabla</description>
+		<longdescription>README.md</longdescription>
+		<license>Apache License 2.0</license>
+		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
+		<doc>docs/requirements.txt</doc>
+	</details>
+	<contents src="index.html" useplatformstyle="true"/>
+	<rendering width="5" height="24"/>
+	<preferences>
+		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" />
+	</preferences>
+	<wiring>
+		<outputendpoint name="outputItem" type="text" label="Envía item seleccionado" description="The messages sent by the user" friendcode="codigo"/>
+		<inputendpoint name="inputItems" type="text" label="Recibe Lista de Items" description="Receive messages sent by other widgets can be received" friendcode="codigo" />
+	</wiring>
+</widget>

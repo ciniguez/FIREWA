@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="" name="weather-example" version="">
+
+    <details>
+        <title>Weather Widget Example</title>
+        <image>images/catalogue.png</image>
+        <smartphoneimage>images/catalogue_iphone.png</smartphoneimage>
+        <description>Example of widget for the WireCloud Plaftorm.</description>
+        <doc>doc/index.md</doc>
+    </details>
+
+    <wiring>
+    </wiring>
+
+    <contents src="index.html"/>
+    <rendering height="24" width="6"/>
+
+</widget>

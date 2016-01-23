@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8"></meta>
+        <title>Test</title>
+        <script type="text/javascript" src="js/main.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+    </head>
+    <body>
+        <div id="loading" class="hide"></div>
+        <div id="noforecast" class="alert alert-info" >There is no forecast data to show.</div>
+        <div id="forecast" class="forecast hide">
+            <h1 id="title"></h1>
+            <div class="current">
+                <div class="block">
+                    <div class="title">Now</div>
+                    <img id="current_status_icon" src="" />
+                    <span id="current_status_label"></span>
+                </div>
+                <div class="block">
+                    <div class="title">Temperature</div>
+                    <div id="current_temp"></div>
+                    <div class="subtitle">Feels Like</div>
+                    <div id="current_feelslike"></div>
+                </div>
+            </div>
+            <div class="nextdays">
+                <div class="block" id="day0">
+                    <div class="title"></div>
+                    <div class="summary">
+                        <img class="status_icon" />
+                        <span class="temp"></span>
+                    </div>
+                    <div class="status_label"></div>
+                </div>
+                <div class="block" id="day1">
+                    <div class="title"></div>
+                    <div class="summary">
+                        <img class="status_icon" />
+                        <span class="temp"></span>
+                    </div>
+                    <div class="status_label"></div>
+                </div>
+                <div class="block" id="day2">
+                    <div class="title"></div>
+                    <div class="summary">
+                        <img class="status_icon" />
+                        <span class="temp"></span>
+                    </div>
+                    <div class="status_label"></div>
+                </div>
+                <div class="block" id="day3">
+                    <div class="title"></div>
+                    <div class="summary">
+                        <img class="status_icon" />
+                        <span class="temp"></span>
+                    </div>
+                    <div class="status_label"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

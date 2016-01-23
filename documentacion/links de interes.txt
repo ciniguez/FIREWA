@@ -1,0 +1,11 @@
+Diapositiva explicación de WireCloud
+https://wirecloud.conwet.etsiinf.upm.es/slides/1.1_Introduction.html#slide16
+
+Wire y otros GEs
+https://wirecloud.conwet.etsiinf.upm.es/slides/1.2_Integration%20with%20other%20GEs.html#slide17
+
+Como construir una aplicación ( usuarios finales)
+https://wirecloud.conwet.etsiinf.upm.es/slides/2.1_End-user%20guide.html#slide12
+
+Video: Uso de WireCloud
+https://edu.fiware.org/mod/page/view.php?id=669

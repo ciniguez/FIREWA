@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="GraphNvd3" version="1.0.0">
+	<details>
+		<title>GrapNvd3</title>
+		<homepage>https://github.com/wirecloud-fiware/quick-start-development-tutorial</homepage>
+		<authors>Carlos Iniguez</authors>
+		<contributors>Carlos Iniguez</contributors>
+		<email>carlos.iniguez79@gmail.com</email>
+		<image>images/graphnvd3.png</image><!-- 170x80 -->
+		<description>NVD3 Grpahs with Angular constraints and nvd3</description>
+		<longdescription>README.md</longdescription>
+		<license>Apache License 2.0</license>
+		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
+		<doc>docs/requirements.txt</doc>
+	</details>
+	<contents src="index.html" useplatformstyle="true"/>
+	<rendering width="5" height="24"/>
+	<preferences>
+		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="http://localhost:8080/2-ProveedorRest/rest/vcf/graph" />
+		<preference name="typeGraph" type="list" label="Type :" description="Graph Type" default="pieChart">
+			<option label="Line" value="lineChart"/>
+			<option label="DiscreteBar" value="discreteBarChart"/>
+			<option label="Pie" value="pieChart"/>
+			<option label="Donut" value="donutChart"/>
+		</preference>
+		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chr">
+			<option label="Chromosome" value="chr"/>
+			<option label="Variantes" value="idVariant_Called"/>
+			<option label="Position" value="pos"/>
+			<option label="IdSNP" value="idSNP"/>
+			<option label="ReferenceAllele" value="referenceAllele"/>
+			<option label="AltAlleles" value="altAlleles"/>
+			<option label="Quality" value="quality"/>
+			<option label="Filter" value="filter"/>
+			<option label="Format" value="format"/>
+		</preference>
+		<preference name="attr2" type="list" label="Attribute 2 :" description="Y Axis" default="idVariant_Called">
+			<option label="Chromosome" value="chr"/>
+			<option label="Variantes" value="idVariant_Called"/>
+			<option label="Position" value="pos"/>
+			<option label="IdSNP" value="idSNP"/>
+			<option label="ReferenceAllele" value="referenceAllele"/>
+			<option label="AltAlleles" value="altAlleles"/>
+			<option label="Quality" value="quality"/>
+			<option label="Filter" value="filter"/>
+			<option label="Format" value="format"/>
+		</preference>
+		<preference name="aggregate" type="list" label="Aggregate Function :" description="Aggregaate Function for attribute 2" default="COUNT">
+			<option label="Sum" value="SUM"/>
+			<option label="Count" value="COUNT"/>
+			<option label="Distinct" value="DISTINCT"/>
+			<option label="Default" value="ALL"/>
+		</preference>
+		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
+			<option label="Development" value="dev"/>
+			<option label="Production" value="prod"/>
+		</preference>
+	</preferences>
+	<wiring>
+		<outputendpoint name="outputCromosome" type="text" label="Chromosome selected output" description="The Chromosome number selected" friendcode="codigo"/>
+		<inputendpoint name="inputChromosome" type="text" label="Chromosome selected input" description="Receive chromosome number sent by other widgets" friendcode="codigo" />
+		<inputendpoint name="inputFilter" type="text" label="Filter selected input" description="Receive Filter number sent by other widgets" friendcode="codigo" />
+		<inputendpoint name="inputAllele" type="text" label="Allele selected input" description="Receive Allele number sent by other widgets" friendcode="codigo" />
+		<inputendpoint name="inputPos" type="text" label="Position selected input" description="Receive Position sent by other widgets" friendcode="codigo" />
+	</wiring>
+</widget>

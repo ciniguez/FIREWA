@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="tableData" version="1.0.0">
+	<details>
+		<title>Table Data</title>
+		<homepage>https://github.com/wirecloud-fiware/quick-start-development-tutorial</homepage>
+		<authors>Carlos Iniguez</authors>
+		<contributors>Carlos Iniguez</contributors>
+		<email>carlos.iniguez79@gmail.com</email>
+		<image>images/usuarios.png</image><!-- 170x80 -->
+		<description>Listar resultados en forma de tabla</description>
+		<longdescription>README.md</longdescription>
+		<license>Apache License 2.0</license>
+		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
+		<doc>docs/requirements.txt</doc>
+	</details>
+	<contents src="index.html" useplatformstyle="true"/>
+	<rendering width="5" height="24"/>
+	<preferences>
+		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="http://localhost:8080/2-ProveedorRest/rest/phenotype?bdd=clinvar" />
+		<preference name="bdd" type="list" label="BDD Source :" description="Data Source Clinic BDD" default="clinvar">
+			<option label="ClinVar" value="clinvar"/>
+		</preference>
+		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
+			<option label="Development" value="dev"/>
+			<option label="Production" value="prod"/>
+		</preference>
+	</preferences>
+	<wiring>
+		<inputendpoint name="inputChromosome" type="text" label="Chromosome selected input" description="Receive chromosome number sent by other widgets" friendcode="codigo" />
+		<inputendpoint name="inputFilter" type="text" label="Filter selected input" description="Receive Filter number sent by other widgets" friendcode="codigo" />
+		<inputendpoint name="inputAllele" type="text" label="Allele selected input" description="Receive Allele number sent by other widgets" friendcode="codigo" />
+		<inputendpoint name="inputPos" type="text" label="Position selected input" description="Receive Position sent by other widgets" friendcode="codigo" />
+	</wiring>
+</widget>

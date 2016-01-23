@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- NOTE: Expects this all is installed in your localhost web server. Find also links to images in polymer-chat-dynamic.html css definitions -->
+    <!-- Platform -->
+    <script src="bower_components/platform/platform.js"></script>
+    <!-- Polymer -->
+    <link rel="import" href="bower_components/polymer/polymer.html">
+    <!-- Use jquery to download polymer component and add it to document -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+  </head>
+  <body>
+    <script>
+      //Download polymer dynamically and at tag to page.
+      $.get( "http://localhost/polymer/chat/polymer-chat-dynamic.html", function( data ) {
+        var element = document.createElement("polymer-chat");
+        element.innerHTML = data;
+        $("body").append(element);
+      });
+
+      //Simple example to use polymer with javascript
+      //Wait for WebComponentsReady event
+      window.addEventListener('WebComponentsReady', function(e) {
+          var pchat = document.querySelector('polymer-chat');
+          //Wait for PolymerChat being ready
+          pchat.addEventListener('polymerchatready', function(e)
+          {
+              pchat.clientusername = "User 1";
+              pchat.addUser("test", "1");
+              pchat.addUser("test2", "2");
+
+              //Connect to polymer fired event
+              pchat.addEventListener('chatmessage', function(e)
+              {
+                  console.log("Event fired in polymer component : "+e.detail.uname+"-"+e.detail.message);
+
+              });
+
+              pchat.onServerMessage("ChatInfoMessage|Server:Message from server.");
+
+          });
+      });
+    </script>
+
+  </body>
+</html>
