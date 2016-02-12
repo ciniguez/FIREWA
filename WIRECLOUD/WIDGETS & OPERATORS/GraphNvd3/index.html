@@ -5,7 +5,7 @@
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 		<title>Graph Nvd3 Angular</title>
-<!--Agrego libreria gráfica d3.js, Angular y nvd3 (respetar orden)-->
+		<!--Agrego libreria gráfica d3.js, Angular y nvd3 (respetar orden)-->
 		<script src="js/angular.js"></script>
 		<script src="js/d3.js" charset="utf-8"></script>
 		<script src="js/nv.d3.js" charset="utf-8"></script>
@@ -17,12 +17,13 @@
 	</head>
 	<body>
 		<div ng-app="myApp">
-			<div ng-controller="myCtrl">
-				<nvd3 options="options" data="data"></nvd3>
+			<div class="chart">
+				<div ng-controller="myCtrl">
+					<nvd3 options="options" data="data"></nvd3>
+				</div>
 			</div>
 		</div>
-		
-		
+
 		<!-- JS -->
 		<script type="text/javascript" src="js/main.js"></script>
 	</body>

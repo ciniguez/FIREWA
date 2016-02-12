@@ -72,6 +72,133 @@
 		/* Add register to wiring the Position value */
 		MashupPlatform.wiring.registerCallback("inputPos", handlerSlotPosition.bind(this));
 
+		logg("presentar_datos", "Registro de Modulo Angular", 165);
+
+		//----------------------------------------------------------------------------------
+		//--------------------------- OBJETOS GRAFICOS--------------------------------------
+		//----------------------------------------------------------------------------------
+		var PieChart = {
+			type : 'pieChart',
+			height : 400,
+			x : function(d) {
+				return d.name;
+			},
+			y : function(d) {
+				return d.valor;
+			},
+			showLabels : true,
+			duration : 500,
+			labelThreshold : 0.01,
+			labelSunbeamLayout : true,
+			legend : {
+				margin : {
+					top : 5,
+					right : 35,
+					bottom : 5,
+					left : 0
+				}
+			},
+			//chart events
+			pie : {
+				dispatch : {
+					elementClick : function(e) {
+						logg("PieChartEvents", "enviando outputCromosome", 230);
+						//wiring the chromosome number
+						MashupPlatform.wiring.pushEvent('outputCromosome', e.data.name);
+					}
+				}
+			}
+		};
+
+		var discreteChart = {
+			type : 'discreteBarChart',
+			height : 400,
+			margin : {
+				top : 20,
+				right : 20,
+				bottom : 50,
+				left : 55
+			},
+			x : function(d) {
+				return d.name;
+			},
+			y : function(d) {
+				return d.valor;
+			},
+			showLabels : true,
+			valueFormat : function(d) {
+				return d3.format(',.4f')(d);
+			},
+			duration : 500,
+			xAxis : {
+				axisLabel : 'X Axis'
+			},
+			yAxis : {
+				axisLabel : 'Y Axis',
+				axisLabelDistance : -10
+			}
+
+		};
+
+		//----------------------------------------------------------------------------------
+		//---------------------------ANGULAR JS --------------------------------------------
+		//----------------------------------------------------------------------------------
+		app = angular.module('myApp', ['nvd3']);
+		app.controller('myCtrl', function($scope) {
+
+			logg("presentar_datos", "presentar_datos: tipoGrafico = " + typeGraph, 163);
+			if (typeGraph === "pieChart") {
+				$scope.options = {
+					chart : PieChart
+				};
+			}
+			if (typeGraph == "discreteBarChart") {
+				//Necesario realizar este formateo de datos debido a que la librería acepta el tipo de formato indicado
+				//como un array con un objeto, el objeto tiene dos atributos: el primero key con el nombre del gráfico
+				//y values con los datos a graficar.
+				var user_data = [{
+					key : 'titulo Grafico',
+					values : user_Data.data
+				}];
+				user_Data = user_data;
+				$scope.options = {
+					chart : discreteChart
+				};
+			}
+			//pongo los datos
+			if (user_Data === null) {
+				user_Data = {
+					"data" : [{
+						"name" : "NO DATA",
+						"valor" : "0"
+					}]
+				};
+				boolCambio = true;
+			}
+			$scope.data = user_Data.data;
+			//Para cuando hace el change
+			$scope.datoCambiado = "";
+			//cambio la data y el tipo de grafico
+			$scope.selectChange = function() {
+				$scope.$apply(function() {
+					logg("SelectChange", "entra a SelectChange", 188);
+					if (typeGraph === "pieChart") {
+						$scope.options.chart = PieChart;
+						$scope.data = user_Data.data;
+					}
+					if (typeGraph === "discreteBarChart") {
+						$scope.options.chart = discreteChart;
+						var datos = [{
+							key : 'titulo Grafico',
+							values : user_Data.data
+						}];
+						$scope.data = datos;
+					}
+				});
+			};
+
+		});
+
 		obtenerDatos();
 
 		/*
@@ -154,128 +281,14 @@
 	 */
 	function presentar_datos() {
 		if (app !== null && boolCambio) {
-			//recupero el módulo de angular y cambio un atributo para que se dispare 
+			//recupero el módulo de angular y cambio un atributo para que se dispare
 			//la funcion apply de cambio de datos
 			var controllerElement = document.querySelector('[ng-controller=myCtrl]');
 			var controllerScope = angular.element(controllerElement).scope();
-			controllerScope.datoCambiado=parametroCambiado;
+			controllerScope.datoCambiado = parametroCambiado;
 			controllerScope.selectChange();
-
-			//logg("presentar_datos", "App no es nula", 160);
 			boolCambio = false;
-		} else {
-			logg("presentar_datos", "Registro de Modulo Angular", 165);
-			//Registro del módulo de parte de Angular
-			app = angular.module('myApp', ['nvd3']);
-			app.controller('myCtrl', function($scope) {
-
-				logg("presentar_datos", "presentar_datos: tipoGrafico = " + typeGraph, 163);
-				if (typeGraph === "pieChart") {
-					$scope.options = {
-						chart : PieChart
-					};
-				}
-				if (typeGraph == "discreteBarChart") {
-					//Necesario realizar este formateo de datos debido a que la librería acepta el tipo de formato indicado
-					//como un array con un objeto, el objeto tiene dos atributos: el primero key con el nombre del gráfico
-					//y values con los datos a graficar.
-					var user_data = [{
-						key : 'titulo Grafico',
-						values : user_Data.data
-					}];
-					user_Data = user_data;
-					$scope.options = {
-						chart : discreteChart
-					};
-				}
-				//pongo los datos
-				$scope.data = user_Data.data;
-				//Para cuando hace el change
-				$scope.datoCambiado = "";
-				//cambio la data y el tipo de grafico
-				$scope.selectChange = function() {
-					$scope.$apply(function() {
-						logg("SelectChange", "entra a SelectChange", 188);
-						if (typeGraph === "pieChart") {
-							$scope.options.chart = PieChart;
-							$scope.data = user_Data.data;
-						}
-						if (typeGraph === "discreteBarChart") {
-							$scope.options.chart = discreteChart;
-							var datos = [{
-								key : 'titulo Grafico',
-								values : user_Data.data
-							}];
-							$scope.data = datos;
-						}
-					});
-				};
-
-			});
 		}
-
-		var PieChart = {
-			type : 'pieChart',
-			height : 500,
-			x : function(d) {
-				return d.name;
-			},
-			y : function(d) {
-				return d.valor;
-			},
-			showLabels : true,
-			duration : 500,
-			labelThreshold : 0.01,
-			labelSunbeamLayout : true,
-			legend : {
-				margin : {
-					top : 5,
-					right : 35,
-					bottom : 5,
-					left : 0
-				}
-			},
-			//chart events
-			pie : {
-				dispatch : {
-					elementClick : function(e) {
-						logg("PieChartEvents", "enviando outputCromosome", 230);
-						//wiring the chromosome number
-						MashupPlatform.wiring.pushEvent('outputCromosome', e.data.name);
-					}
-				}
-			}
-		};
-
-		var discreteChart = {
-			type : 'discreteBarChart',
-			height : 450,
-			margin : {
-				top : 20,
-				right : 20,
-				bottom : 50,
-				left : 55
-			},
-			x : function(d) {
-				return d.name;
-			},
-			y : function(d) {
-				return d.valor;
-			},
-			showLabels : true,
-			valueFormat : function(d) {
-				return d3.format(',.4f')(d);
-			},
-			duration : 500,
-			xAxis : {
-				axisLabel : 'X Axis'
-			},
-			yAxis : {
-				axisLabel : 'Y Axis',
-				axisLabelDistance : -10
-			}
-
-		};
 
 	}
 

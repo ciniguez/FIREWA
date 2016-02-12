@@ -14,7 +14,7 @@
 		<doc>docs/requirements.txt</doc>
 	</details>
 	<contents src="index.html" useplatformstyle="true"/>
-	<rendering width="5" height="24"/>
+	<rendering width="5" height="15"/>
 	<preferences>
 		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="http://localhost:8080/2-ProveedorRest/rest/vcf/graph" />
 		<preference name="typeGraph" type="list" label="Type :" description="Graph Type" default="pieChart">
