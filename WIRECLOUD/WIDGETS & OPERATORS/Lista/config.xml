@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="GaugeChart" version="1.0.0">
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="DataList" version="1.0.0">
 	<details>
-		<title>GaugeChart</title>
+		<title>DataList</title>
 		<homepage>https://github.com/wirecloud-fiware/quick-start-development-tutorial</homepage>
 		<authors>Carlos Iniguez</authors>
 		<contributors>Carlos Iniguez</contributors>
 		<email>carlos.iniguez79@gmail.com</email>
 		<image>images/graphnvd3.png</image><!-- 170x80 -->
-		<description>GaugeChart based on C3.js </description>
+		<description>Lista de Datos</description>
 		<longdescription>README.md</longdescription>
 		<license>Apache License 2.0</license>
 		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
@@ -17,8 +17,11 @@
 	<rendering width="5" height="15"/>
 	<preferences>
 		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="http://localhost:8080/2-ProveedorRest/rest/vcf/graph" />
-		<preference name="attr1" type="list" label="Domain :" description="Domain to show vs Variants" default="chr">
+		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chr">
 			<option label="Chromosome" value="chr"/>
+			<option label="Variantes" value="idVariant_Called"/>
+			<option label="Position" value="pos"/>
+			<option label="IdSNP" value="idSNP"/>
 			<option label="ReferenceAllele" value="referenceAllele"/>
 			<option label="AltAlleles" value="altAlleles"/>
 			<option label="Quality" value="quality"/>
@@ -31,7 +34,6 @@
 		</preference>
 	</preferences>
 	<wiring>
-		<!--outputendpoint name="outputCromosome" type="text" label="Chromosome selected output" description="The Chromosome number selected" friendcode="codigo"/-->
-		<inputendpoint name="inputDominio" type="text" label="Dominio" description="Receive domine sent by other widgets" friendcode="domine" />
+		<outputendpoint name="outputItem" type="text" label="Variable selected output" description="The Variable number selected" friendcode="codigo"/>
 	</wiring>
 </widget>

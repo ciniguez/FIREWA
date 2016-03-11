@@ -18,10 +18,14 @@
 	 */
 	"use strict";
 	// url de servicio web consultada
-	var url = "http://localhost:8080/2-ProveedorRest/rest/variacion/cromosoma?chr=1";
-	// atributo 1 para el grafico. Por default se tomará "chr"
-	// puede tomar los siguientes valores:chr, referenceAllele", altAlleles, quality, filter, format
-	var domain = "chr";
+	var url = "http://server:puerto/appName/getlista?cmp=“campo";
+	// atributo 1 para el grafico
+	var attr1 = "chr";
+	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
+	var environment = "dev";
+	// cadena para almacenar el parametro cambiado
+	var parametroCambiado = null;
+	var boolCambio = false;
 
 	/**
 	 * Inicialización de variables
@@ -30,88 +34,13 @@
 
 		//Obtener los atributos desde preferencias
 		url = obtenerAtributoPreferencias('urlServicio');
-		domain = obtenerAtributoPreferencias('attr1');
+		attr1 = obtenerAtributoPreferencias('attr1');
 		//Variable para saber si se ejecuta en Ambiente de producción o debug
 		//(debug muestra los mensajes de código)
 		environment = obtenerAtributoPreferencias('environment');
 
-		//REGISTRO DE WIRING
-		/* Add register to wiring the Cromosome input value*/
-		MashupPlatform.wiring.registerCallback("inputDominio", handlerSlotDomine.bind(this));
-
-		//logg("presentar_datos", "Registro de Modulo Angular", 165);
-
-		var gauge = c3.generate({
-			bindto : "#gauge",
-			data : {
-				columns : [['data', 91.4]],
-				type : 'gauge'
-				/*,
-				 onclick : function(d, i) {
-				 console.log("onclick", d, i);
-				 },
-				 onmouseover : function(d, i) {
-				 console.log("onmouseover", d, i);
-				 },
-				 onmouseout : function(d, i) {
-				 console.log("onmouseout", d, i);
-				 }*/
-			},
-			gauge : {
-				//        label: {
-				//            format: function(value, ratio) {
-				//                return value;
-				//            },
-				//            show: false // to turn off the min/max labels.
-				//        },
-				//    min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
-				//    max: 100, // 100 is default
-				//    units: ' %',
-				//    width: 39 // for adjusting arc thickness
-			},
-			color : {
-				pattern : ['#FF0000', '#F97600', '#F6C600', '#60B044'], // the three color levels for the percentage values.
-				threshold : {
-					//            unit: 'value', // percentage is default
-					//            max: 200, // 100 is default
-					values : [30, 60, 90, 100]
-				}
-			},
-			size : {
-				height : 180
-			}
-		});
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 10]]
-			});
-		}, 1000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 50]]
-			});
-		}, 2000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 70]]
-			});
-		}, 3000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 0]]
-			});
-		}, 4000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 100]]
-			});
-		}, 5000);
-
+		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
+		//----------------------------------------------------------------------------------
 		/*
 		 * Registro lo que ingresa como Preferencia
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
@@ -125,7 +54,7 @@
 				parametroCambiado = "url";
 			}
 			if ('attr1' in new_values) {
-				domain = obtenerAtributoPreferencias('attr1');
+				attr1 = obtenerAtributoPreferencias('attr1');
 				parametroCambiado = "attr1";
 			}
 			if ('environment' in new_values) {
@@ -134,16 +63,30 @@
 			}
 			//llamo a que se ejecute la obtención de datos desde el servidor
 			logg("init", "parametro cambiado: " + parametroCambiado, 111);
-			obtenerDatos();
+			dispararCambio(parametroCambiado);
 
 		});
 
+		//----------------------------------------------------------------------------------
+		//--------------------------- CARGA DE DATOS  --------------------------------------
+		//----------------------------------------------------------------------------------
+
+		//------------ !!!!! QUITAR CUANDO HAYA SERVIDOR -----------------------------------
+		url = null;
+		//----------------------------------------------------------------------------------
+
+		//--------------------------- CARGA DE DATOS  --------------------------------------
+		//----------------------------------------------------------------------------------
+
+		obtenerDatos();
+		logg("init", "entra en init", 82);
+		boolCambio= true;
 	}
 
 	/**
-	 * Recuperar los datos desde el servicio web
+	 * Enviar los datos al servidor
 	 */
-	function obtenerDatos() {
+	function enviarDatosAlServidor(datosJSON) {
 
 		//Generar la URL con todos los parametros de consulta
 		var urlResultado = generarParametrosEnURL(url);
@@ -152,10 +95,42 @@
 		if (urlResultado !== null) {
 			//Realizar la llamada al Servicio Web REST
 			MashupPlatform.http.makeRequest(urlResultado, {
+				method : 'POST',
+				postBody : datosJSON,
+				contentType : "application/json",
+				onSuccess : function(response) {
+					logg("enviarDatosAlServidor", "Envio al Servidor con Exito", 114);
+				},
+				onError : function() {
+					MashupPlatform.widget.log("Error en Envio a Server", MashupPlatform.log.ERROR);
+					onError();
+				}
+			});
+		} else {
+			MashupPlatform.widget.log("Error: ObtenerDatos->La URL es NULA", MashupPlatform.log.ERROR);
+		}
+	}
+
+	/**
+	 * Recuperar los datos desde el servicio web
+	 */
+	function obtenerDatos() {
+
+		//Generar la URL con todos los parametros de consulta
+		//TODO Cambiar cuando haya servidor
+		//var urlResultado = generarParametrosEnURL(url);
+		var urlResultado = null;
+		//FIN CAMBIO
+
+		logg("obtenerDatos", "trabajando con url: " + urlResultado, 129);
+
+		if (urlResultado !== null) {
+			//Realizar la llamada al Servicio Web REST
+			MashupPlatform.http.makeRequest(urlResultado, {
 				method : 'GET',
 				onSuccess : function(response) {
 					//Obtener los datos
-					var user_Data = JSON.parse(response.responseText);
+					user_Data = JSON.parse(response.responseText);
 
 					if (user_Data.error) {
 						MashupPlatform.widget.log("Error en Procesamiento", MashupPlatform.log.ERROR);
@@ -171,7 +146,23 @@
 				}
 			});
 		} else {
-			MashupPlatform.widget.log("Error: ObtenerDatos->La URL es NULA", MashupPlatform.log.ERROR);
+			//MashupPlatform.widget.log("Error: ObtenerDatos->La URL es NULA", MashupPlatform.log.ERROR);
+			//TODO eliminar cuando haya servidor
+			var data = [];
+			data.push({
+				"id" : 1,
+				"description" : "Sample 1"
+			});
+			data.push({
+				"id" : 2,
+				"description" : "Sample 2"
+			});
+			data.push({
+				"id" : 3,
+				"description" : "Sample 3"
+			});
+			presentar_datos(data);
+			// FIN TODO
 		}
 	}
 
@@ -179,11 +170,44 @@
 	 * Swith between the graph options based on the two parameters.
 	 */
 	function presentar_datos(data) {
-		//Cargo el Gauge con la nueva data
-		var datos = {
-			columns : [['data', data.valor]]
-		};
-		gauge.load(datos);
+
+		
+		if (boolCambio) {
+			logg("presentar_datos", data, 173);
+			//Borro todo item de lista. Dejar limpia la lista
+			$('#selectable').empty();
+			//Por cada item en los datos se agrega un item de lista
+			for (var i = 0; i < data.length; i++) {
+				$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].description + '</li>');
+			}
+			var arrayItemsSeleccionados = [];
+			//Pongo el comportamiento
+			$("#selectable").selectable({
+				stop : function() {
+					arrayItemsSeleccionados.length=0;
+					$(".ui-selected", this).each(function() {
+						var index = $("#selectable li").index(this);
+						arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
+					});
+					logg("presentar_datos", "Wiring: " + JSON.stringify(arrayItemsSeleccionados), 163);
+					//wiring the chromosome number
+					MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
+					//Envio los datos al servidor
+					//enviarDatosAlServidor(JSON.stringify(arrayItemsSeleccionados));
+				}
+			});
+			boolCambio = false;
+		}
+
+	}
+
+	/**
+	 * Llama a OntenerDatos(). Funciona como un punto de encuentro común y seteo de variable.
+	 */
+	function dispararCambio(cadena) {
+		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
+		boolCambio = true;
+		obtenerDatos();
 	}
 
 	/**
@@ -199,10 +223,10 @@
 				throw "La URL proporcionada es NULA o UNDEFINED";
 			}
 
-			//Si attr1 y attr2 son nulos, se comunica al usuario la
-			//falta de parametros fundamentales (attr1 y attr2)
-			if (domain === null) {
-				throw "El dominio es nulo !!";
+			//Si attr1 es nulo, se comunica al usuario la
+			//falta de parametros fundamentales (attr1)
+			if (attr1 === null) {
+				throw "El atributo 1 es nulo !!";
 			}
 
 			//Si la URL está mal formada, es arreglada dejándola en estado fundamental
@@ -215,25 +239,15 @@
 				urlResultante = urlSinFormato;
 			}
 
-			if (domain != null) {
-				urlResultante = urlResultante.concat("?var="+domain+"&&value="+3);
-			}
-
+			//Se agrega a la URL el parametro
+			urlResultante = urlResultante.concat("?cmp=" + attr1);
 			return urlResultante;
 
 		} catch(err) {
 
-			MashupPlatform.widget.log("Error: URL no bien formada: " + urlResultante, MashupPlatform.log.INFO);
+			MashupPlatform.widget.log(err, MashupPlatform.log.ERROR);
 			return urlResultante;
 		}
-	};
-	/**
-	 * Obtener datos enviados al Widget
-	 * @param {Object} itemString
-	 */
-	var handlerSlotDomine = function handlerDomine(itemString) {
-		domain = itemString;
-		obtenerDatos();
 	};
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
