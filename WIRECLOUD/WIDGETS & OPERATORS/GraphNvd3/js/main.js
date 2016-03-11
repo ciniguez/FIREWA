@@ -345,7 +345,7 @@
 
 			//Si attr1 y attr2 son nulos, se comunicar a usuario la
 			//falta de parametros fundamentales (attr1 y attr2)
-			if (attr1 === null || attr1 === null) {
+			if (attr1 === null || attr2 === null) {
 				throw "Los atributos 1 y 2 son nulos !!";
 			}
 

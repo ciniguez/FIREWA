@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="GaugeChart" version="1.0.0">
+	<details>
+		<title>GaugeChart</title>
+		<homepage>https://github.com/wirecloud-fiware/quick-start-development-tutorial</homepage>
+		<authors>Carlos Iniguez</authors>
+		<contributors>Carlos Iniguez</contributors>
+		<email>carlos.iniguez79@gmail.com</email>
+		<image>images/graphnvd3.png</image><!-- 170x80 -->
+		<description>GaugeChart based on C3.js </description>
+		<longdescription>README.md</longdescription>
+		<license>Apache License 2.0</license>
+		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
+		<doc>docs/requirements.txt</doc>
+	</details>
+	<contents src="index.html" useplatformstyle="true"/>
+	<rendering width="5" height="15"/>
+	<preferences>
+		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="http://localhost:8080/2-ProveedorRest/rest/vcf/graph" />
+		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
+			<option label="Development" value="dev"/>
+			<option label="Production" value="prod"/>
+		</preference>
+	</preferences>
+	<wiring>
+		<!--outputendpoint name="outputCromosome" type="text" label="Chromosome selected output" description="The Chromosome number selected" friendcode="codigo"/-->
+		<inputendpoint name="inputDominio" type="text" label="Dominio" description="Receive domine sent by other widgets" friendcode="domine" />
+	</wiring>
+</widget>
