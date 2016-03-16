@@ -29,15 +29,15 @@
 	function init() {
 
 		//Obtener los atributos desde preferencias
-		url = obtenerAtributoPreferencias('urlServicio');
-		domain = obtenerAtributoPreferencias('attr1');
+		//url = obtenerAtributoPreferencias('urlServicio');
+		//domain = obtenerAtributoPreferencias('attr1');
 		//Variable para saber si se ejecuta en Ambiente de producción o debug
 		//(debug muestra los mensajes de código)
-		environment = obtenerAtributoPreferencias('environment');
+		//environment = obtenerAtributoPreferencias('environment');
 
 		//REGISTRO DE WIRING
 		/* Add register to wiring the Cromosome input value*/
-		MashupPlatform.wiring.registerCallback("inputDominio", handlerSlotDomine.bind(this));
+		//MashupPlatform.wiring.registerCallback("inputDominio", handlerSlotDomine.bind(this));
 
 		//logg("presentar_datos", "Registro de Modulo Angular", 165);
 
@@ -78,7 +78,7 @@
 				}
 			},
 			size : {
-				height : 180
+				height : 90
 			}
 		});
 
@@ -117,6 +117,7 @@
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
 		 */
+		/*
 		MashupPlatform.prefs.registerCallback(function(new_values) {
 			parametroCambiado = "";
 			var boolean_flag = false;
@@ -137,6 +138,7 @@
 			obtenerDatos();
 
 		});
+		*/
 
 	}
 

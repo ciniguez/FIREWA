@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="GraphNvd3" version="1.0.0">
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="HOME" name="nvd3G" version="1.0.0">
 	<details>
-		<title>GrapNvd3</title>
+		<title>nvd3G</title>
 		<homepage>https://github.com/wirecloud-fiware/quick-start-development-tutorial</homepage>
 		<authors>Carlos Iniguez</authors>
 		<contributors>Carlos Iniguez</contributors>
@@ -14,7 +14,7 @@
 		<doc>docs/requirements.txt</doc>
 	</details>
 	<contents src="index.html" useplatformstyle="true"/>
-	<rendering width="5" height="15"/>
+	<rendering width="5" height="10"/>
 	<preferences>
 		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="" />
 		<preference name="typeGraph" type="list" label="Type :" description="Graph Type" default="pieChart">

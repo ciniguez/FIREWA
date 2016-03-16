@@ -1,82 +1,6 @@
 /*jshint browser:true*/
 /*global MashupPlatform StyledElements Vcard NGSI*/
 
-var dataShowCase = {
-	"data" : [{
-		"name" : "1",
-		"valor" : "2562"
-	}, {
-		"name" : "10",
-		"valor" : "1604"
-	}, {
-		"name" : "11",
-		"valor" : "1518"
-	}, {
-		"name" : "12",
-		"valor" : "1368"
-	}, {
-		"name" : "13",
-		"valor" : "1161"
-	}, {
-		"name" : "14",
-		"valor" : "954"
-	}, {
-		"name" : "15",
-		"valor" : "915"
-	}, {
-		"name" : "16",
-		"valor" : "1040"
-	}, {
-		"name" : "17",
-		"valor" : "861"
-	}, {
-		"name" : "18",
-		"valor" : "891"
-	}, {
-		"name" : "19",
-		"valor" : "670"
-	}, {
-		"name" : "2",
-		"valor" : "2411"
-	}, {
-		"name" : "20",
-		"valor" : "625"
-	}, {
-		"name" : "21",
-		"valor" : "566"
-	}, {
-		"name" : "22",
-		"valor" : "319"
-	}, {
-		"name" : "3",
-		"valor" : "2047"
-	}, {
-		"name" : "4",
-		"valor" : "2233"
-	}, {
-		"name" : "5",
-		"valor" : "1531"
-	}, {
-		"name" : "6",
-		"valor" : "1582"
-	}, {
-		"name" : "7",
-		"valor" : "1303"
-	}, {
-		"name" : "8",
-		"valor" : "1586"
-	}, {
-		"name" : "9",
-		"valor" : "1398"
-	}, {
-		"name" : "X",
-		"valor" : "717"
-	}, {
-		"name" : "Y",
-		"valor" : "145"
-	}]
-};
-
 /**
  * Esta función es una función anónima que se ejecuta inmediatamente.
  * La función está compuesta por:
@@ -152,137 +76,21 @@ var dataShowCase = {
 		//----------------------------------------------------------------------------------
 		//--------------------------- OBJETOS GRAFICOS--------------------------------------
 		//----------------------------------------------------------------------------------
-		var PieChart = {
-			type : 'pieChart',
-			height : 400,
-			x : function(d) {
-				return d.name;
-			},
-			y : function(d) {
-				return d.valor;
-			},
-			showLabels : true,
-			duration : 500,
-			labelThreshold : 0.01,
-			labelSunbeamLayout : true,
-			legend : {
-				margin : {
-					top : 5,
-					right : 35,
-					bottom : 5,
-					left : 0
-				}
-			},
-			//chart events
-			pie : {
-				dispatch : {
-					elementClick : function(e) {
-						logg("PieChartEvents", "enviando outputCromosome", 230);
-						//wiring the chromosome number
-						MashupPlatform.wiring.pushEvent('outputCromosome', e.data.name);
-					}
-				}
-			}
-		};
-
-		var discreteChart = {
-			type : 'discreteBarChart',
-			height : 400,
-			margin : {
-				top : 20,
-				right : 20,
-				bottom : 50,
-				left : 55
-			},
-			x : function(d) {
-				return d.name;
-			},
-			y : function(d) {
-				return d.valor;
-			},
-			showLabels : true,
-			valueFormat : function(d) {
-				return d3.format(',.4f')(d);
-			},
-			duration : 500,
-			xAxis : {
-				axisLabel : 'X Axis'
-			},
-			yAxis : {
-				axisLabel : 'Y Axis',
-				axisLabelDistance : -10
-			}
-
-		};
 
 		logg("presentar_datos", "Registro de Modulo Angular", 165);
 
 		//----------------------------------------------------------------------------------
-		//---------------------------ANGULAR JS --------------------------------------------
+		//--------------------------- GRAFICOS NVD3--------------------------------------------
 		//----------------------------------------------------------------------------------
-		app = angular.module('myApp', ['nvd3']);
-		app.controller('myCtrl', function($scope) {
 
-			logg("presentar_datos", "presentar_datos: tipoGrafico = " + typeGraph, 163);
-			if (typeGraph === "pieChart") {
-				$scope.options = {
-					chart : PieChart
-				};
-			}
-			if (typeGraph == "discreteBarChart") {
-				//Necesario realizar este formateo de datos debido a que la librería acepta el tipo de formato indicado
-				//como un array con un objeto, el objeto tiene dos atributos: el primero key con el nombre del gráfico
-				//y values con los datos a graficar.
-				var user_data = [{
-					key : 'titulo Grafico',
-					values : user_Data.data
-				}];
-				user_Data = user_data;
-				$scope.options = {
-					chart : discreteChart
-				};
-			}
-			//pongo los datos
-			if (user_Data === null) {
-				user_Data = {
-					"data" : [{
-						"name" : "NO DATA",
-						"valor" : "0"
-					}]
-				};
-				boolCambio = true;
-			}
-			$scope.data = user_Data.data;
-			//Para cuando hace el change
-			$scope.datoCambiado = "";
-			//cambio la data y el tipo de grafico
-			$scope.selectChange = function() {
-				$scope.$apply(function() {
-					logg("SelectChange", "entra a SelectChange", 188);
-					if (typeGraph === "pieChart") {
-						$scope.options.chart = PieChart;
-						$scope.data = user_Data.data;
-					}
-					if (typeGraph === "discreteBarChart") {
-						$scope.options.chart = discreteChart;
-						var datos = [{
-							key : 'titulo Grafico',
-							values : user_Data.data
-						}];
-						$scope.data = datos;
-					}
-				});
-			};
-
-		});
-
-		obtenerDatos();
+		obtenerDatos1();
 
 		/*
 		 * Registro lo que ingresa como Preferencia
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
 		 */
+
 		MashupPlatform.prefs.registerCallback(function(new_values) {
 			parametroCambiado = "";
 			var boolean_flag = false;
@@ -316,6 +124,78 @@ var dataShowCase = {
 
 		});
 
+	}
+
+	function obtenerDatos1() {
+		logg("init", "Tipo grafico: " + typeGraph, 130);
+
+		if (typeGraph === "discreteBarChart") {
+
+			nv.addGraph(function() {
+				$('.bar-chart svg').empty();
+				var historicalBarChart = [{
+					key : 'Cumulative Return',
+					values : [{
+						'label' : 'A Label',
+						'value' : -29.765957771107,
+						'color' : '#00b19d'
+					}, {
+						'label' : 'B Label',
+						'value' : 50,
+						'color' : '#ef5350'
+					}, {
+						'label' : 'C Label',
+						'value' : 32.807804682612,
+						'color' : '#3DDCF7'
+					}, {
+						'label' : 'D Label',
+						'value' : 196.45946739256,
+						'color' : '#ffaa00'
+					}, {
+						'label' : 'E Label',
+						'value' : 15.79434030906893,
+						'color' : '#81c868'
+					}, {
+						'label' : 'F Label',
+						'value' : -98.079782601442,
+						'color' : '#dcdcdc'
+					}, {
+						'label' : 'G Label',
+						'value' : -13.925743130903,
+						'color' : '#333333'
+					}, {
+						'label' : 'H Label',
+						'value' : -5.1387322875705,
+						'color' : '#3bafda'
+					}]
+				}];
+				var barChart = nv.models.discreteBarChart().x(function(d) {
+					return d.label;
+				}).y(function(d) {
+					return d.value;
+				}).staggerLabels(true).tooltips(false).showValues(true).duration(250);
+				barChart.yAxis.axisLabel('Price change in USD');
+				d3.select('.bar-chart svg').datum(historicalBarChart).call(barChart);
+				nv.utils.windowResize(barChart.update);
+				return barChart;
+			});
+		}
+		if (typeGraph === "pieChart") {
+
+			//Regular pie chart example
+			nv.addGraph(function() {
+				$('.bar-chart svg').empty();
+				var chart = nv.models.pieChart().x(function(d) {
+					return d.label;
+				}).y(function(d) {
+					return d.value;
+				}).showLabels(true);
+
+				d3.select('.bar-chart svg').datum(exampleData).transition().duration(1200).call(chart);
+
+				return chart;
+			});
+		}
 	}
 
 	/**
@@ -407,7 +287,7 @@ var dataShowCase = {
 	function dispararCambio(cadena) {
 		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 311);
 		boolCambio = true;
-		obtenerDatos();
+		obtenerDatos1();
 	}
 
 	/**
@@ -489,6 +369,41 @@ var dataShowCase = {
 	 * Llamada a la función (init() como inicializador)
 	 * NOTE: I have changed "DOMContentLoaded" for "load" beacause I need the whole HTML and resources loaded.
 	 */
+
+	//Pie chart example data. Note how there is only a single array of key-value pairs.
+	function exampleData() {
+		return [{
+			"label" : "One",
+			"value" : 29.765957771107,
+			"color" : "#00b19d"
+		}, {
+			"label" : "Two",
+			"value" : 60,
+			'color' : '#ef5350'
+		}, {
+			"label" : "Three",
+			"value" : 39.69895,
+			'color' : '#3ddcf7'
+		}, {
+			"label" : "Four",
+			"value" : 160.45946739256,
+			'color' : '#ffaa00'
+		}, {
+			"label" : "Five",
+			"value" : 89.02525,
+			'color' : '#81c868'
+		}, {
+			"label" : "Six",
+			"value" : 98.079782601442,
+			'color' : '#dcdcdc'
+		}, {
+			"label" : "Seven",
+			"value" : 98.925743130903,
+			'color' : '#3bafda'
+		}];
+	}
+
+
 	document.addEventListener('load', init.bind(this), true);
 
 })();

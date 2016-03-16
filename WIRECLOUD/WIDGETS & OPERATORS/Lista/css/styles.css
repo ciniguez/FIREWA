@@ -1,6 +1,5 @@
-
-#feedback {
-	font-size: 1.4em;
+body,html {
+	margin: 0;
 }
 #selectable .ui-selecting {
 	background: #FECA40;
@@ -13,11 +12,31 @@
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
-	width: 60%;
+	width: 100%;
+}
+.contendor{
+	border:3px solid rgb(22,41,85);
 }
 #selectable li {
-	margin: 3px;
+	margin: 1px;
 	padding: 0.4em;
-	font-size: 1.4em;
+	font-size: 1.3em;
 	height: 18px;
+	font-family: sans-serif;
+	border:1px solid rgb(232,232,232);
 }
+
+#title {
+	height: 30px;
+	text-align: center;
+	background: rgb(22,41,85);
+	
+	background: -webkit-linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
+	background: -o-linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
+	background: -moz-linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
+	background: linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
+	color: rgb(120,135,171);
+	font-family: sans-serif;
+	line-height: 30px;
+}
+

@@ -32,12 +32,13 @@
 	 */
 	function init() {
 
+		$( "#selectable" ).selectable();
 		//Obtener los atributos desde preferencias
-		url = obtenerAtributoPreferencias('urlServicio');
-		attr1 = obtenerAtributoPreferencias('attr1');
+		//--url = obtenerAtributoPreferencias('urlServicio');
+		//--attr1 = obtenerAtributoPreferencias('attr1');
 		//Variable para saber si se ejecuta en Ambiente de producción o debug
 		//(debug muestra los mensajes de código)
-		environment = obtenerAtributoPreferencias('environment');
+		//--environment = obtenerAtributoPreferencias('environment');
 
 		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
 		//----------------------------------------------------------------------------------
@@ -46,6 +47,7 @@
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
 		 */
+		/*
 		MashupPlatform.prefs.registerCallback(function(new_values) {
 			parametroCambiado = "";
 			var boolean_flag = false;
@@ -66,6 +68,7 @@
 			dispararCambio(parametroCambiado);
 
 		});
+		*/
 
 		//----------------------------------------------------------------------------------
 		//--------------------------- CARGA DE DATOS  --------------------------------------
@@ -78,8 +81,8 @@
 		//--------------------------- CARGA DE DATOS  --------------------------------------
 		//----------------------------------------------------------------------------------
 
-		obtenerDatos();
-		logg("init", "entra en init", 82);
+		//--obtenerDatos();
+		//--logg("init", "entra en init", 82);
 		boolCambio= true;
 	}
 
