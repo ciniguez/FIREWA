@@ -26,13 +26,17 @@
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
 	var boolCambio = false;
+	//variable para el WebSocket
+	var ws; 
+	
 
 	/**
 	 * Inicialización de variables
 	 */
 	function init() {
+		//Inicio el WebSocket con la funcion callback, encargada de que llena los datos en pantalla.
+		ws = new MODELO.websocket(presentar_datos);
 
-		$( "#selectable" ).selectable();
 		//Obtener los atributos desde preferencias
 		//--url = obtenerAtributoPreferencias('urlServicio');
 		//--attr1 = obtenerAtributoPreferencias('attr1');
@@ -43,29 +47,29 @@
 		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
 		//----------------------------------------------------------------------------------
 		/*
-		 * Registro lo que ingresa como Preferencia
-		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
-		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
-		 */
+		* Registro lo que ingresa como Preferencia
+		* Si existe un cambio en un parámetro de preferencias, este método se dispara
+		* para obtener el nuevo valor y llama a presentar los datos en el gráfico
+		*/
 		/*
 		MashupPlatform.prefs.registerCallback(function(new_values) {
-			parametroCambiado = "";
-			var boolean_flag = false;
-			if ('urlServicio' in new_values) {
-				url = obtenerAtributoPreferencias('urlServicio');
-				parametroCambiado = "url";
-			}
-			if ('attr1' in new_values) {
-				attr1 = obtenerAtributoPreferencias('attr1');
-				parametroCambiado = "attr1";
-			}
-			if ('environment' in new_values) {
-				parametroCambiado = "env";
-				environment = obtenerAtributoPreferencias('environment');
-			}
-			//llamo a que se ejecute la obtención de datos desde el servidor
-			logg("init", "parametro cambiado: " + parametroCambiado, 111);
-			dispararCambio(parametroCambiado);
+		parametroCambiado = "";
+		var boolean_flag = false;
+		if ('urlServicio' in new_values) {
+		url = obtenerAtributoPreferencias('urlServicio');
+		parametroCambiado = "url";
+		}
+		if ('attr1' in new_values) {
+		attr1 = obtenerAtributoPreferencias('attr1');
+		parametroCambiado = "attr1";
+		}
+		if ('environment' in new_values) {
+		parametroCambiado = "env";
+		environment = obtenerAtributoPreferencias('environment');
+		}
+		//llamo a que se ejecute la obtención de datos desde el servidor
+		logg("init", "parametro cambiado: " + parametroCambiado, 111);
+		dispararCambio(parametroCambiado);
 
 		});
 		*/
@@ -83,7 +87,7 @@
 
 		//--obtenerDatos();
 		//--logg("init", "entra en init", 82);
-		boolCambio= true;
+		boolCambio = true;
 	}
 
 	/**
@@ -174,9 +178,8 @@
 	 */
 	function presentar_datos(data) {
 
-		
 		if (boolCambio) {
-			logg("presentar_datos", data, 173);
+			//logg("presentar_datos", data, 173);
 			//Borro todo item de lista. Dejar limpia la lista
 			$('#selectable').empty();
 			//Por cada item en los datos se agrega un item de lista
@@ -187,14 +190,18 @@
 			//Pongo el comportamiento
 			$("#selectable").selectable({
 				stop : function() {
-					arrayItemsSeleccionados.length=0;
+					arrayItemsSeleccionados.length = 0;
 					$(".ui-selected", this).each(function() {
 						var index = $("#selectable li").index(this);
 						arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
 					});
-					logg("presentar_datos", "Wiring: " + JSON.stringify(arrayItemsSeleccionados), 163);
+					ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
+					//logg("presentar_datos", "Wiring: " + JSON.stringify(arrayItemsSeleccionados), 163);
+					
 					//wiring the chromosome number
-					MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
+					// TODO: Quitar comentario
+					//MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
+					
 					//Envio los datos al servidor
 					//enviarDatosAlServidor(JSON.stringify(arrayItemsSeleccionados));
 				}
@@ -247,8 +254,8 @@
 			return urlResultante;
 
 		} catch(err) {
-
-			MashupPlatform.widget.log(err, MashupPlatform.log.ERROR);
+			// TODO: quitar comentario
+			//MashupPlatform.widget.log(err, MashupPlatform.log.ERROR);
 			return urlResultante;
 		}
 	};

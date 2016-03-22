@@ -5,24 +5,20 @@ Autor: sblanco
 
 Requisitos generales:
     A. Al iniciar el widget se debe mostrar un mensaje para alertar al usuario de que debe comunicarse por wiring.
-    B. Se debe poder recibir una Issue y ser mostrada en una lista de Issues.
-    C. Cada Issue de la lista debe poseer una lista de Workers.
-    D. En toda Issue, todo Worker debe poder ser asignado por el usuario de la lista de Worker (de dicha Issue).
-    E. Se debe poder recibir un Worker y ser mostrado en cada lista de Workers.
-    F. Cuando se seleccione una Issue de la lista, se envía la información de la Issue.
-    G. Cuando se asigne un Worker a una Issue, se envía la información del Worker y la ruta desde el Worker hasta la Issue.
+    B. El widget debe poder recibir por WebSocket la lista de datos que serán listadas en pantalla a manera de columna.
+    C. Cada item de la lista desplegará en nombre del item
+    D. Se podrá seleccionar uno o varios items secuencciales.
+    E. Al seleccionar un item de la lista, se debe enviar como salida la lista de items seleccionados, la entrega de datos debe ser realizada mediante WebSocket.
 
 Definiciones:
-    - Issue: Es una tupla: (Identificador, Descripción, Tipo, Estado)
-    - Route: Es una cadena de texto de la forma "from: origin to: destination". Donde origin es el origen y destination es el destino.
-    - Worker: Es un string en formato vCard (3.0 ó 4.0).
+    - WebSocket: Comunicación duplex (cliente servidor).
 
 
 Requisitos especificos:
 
 1. Visuales:
     1.1. Al iniciar el widget se debe mostrar un mensaje para alertar al usuario de que debe hacer el wiring.
-    1.2. Si llega una Issue, se muestra una tabla que contiene las incidencias recibidas y el técnico asignado en cada momento.
+    1.2. Si llega un item, se agrega el item a la lista.
 
 2. Funcionalidad:
     2.1. Secuencial:
@@ -56,3 +52,9 @@ Requisitos especificos:
 
 5. Persistencia:
     - No procede.
+6. Formato de Datos a recibir:
+	[{"id": id_item_1, "description": text_description},
+	{"id": id_item_2, "description": text_description}
+	{"id": id_item_3, "description": text_description}]
+7. Formato de salida de datos:
+	[id_item_seleccionado_1,id_item_seleccionado_2,id_item_seleccionado_n ]
