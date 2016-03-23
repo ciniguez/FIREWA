@@ -56,3 +56,25 @@ Requisitos especificos:
 
 5. Persistencia:
     - No procede.
+
+6. Formato de Datos de Entrada
+[
+	{
+		"chromosomeId":1,
+		"name":"Chromosome 1",
+		"referenceId":"Reference 1",
+		"curatedVariations":null,
+		"calledVariations":null,
+		"sizeCuratedVariations":0,
+		"sizeCalledVariations":12
+	},
+	{
+		"chromosomeId":2,
+		"name":"Chromosome 2",
+		"referenceId":"Reference 2",
+		"curatedVariations":null,
+		"calledVariations":null,
+		"sizeCuratedVariations":0,
+		"sizeCalledVariations":24
+	}
+]

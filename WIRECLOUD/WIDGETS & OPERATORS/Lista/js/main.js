@@ -35,14 +35,14 @@
 	 */
 	function init() {
 		//Inicio el WebSocket con la funcion callback, encargada de que llena los datos en pantalla.
-		ws = new MODELO.websocket(presentar_datos);
+		ws = new MODELO.websocket(presentar_datos, noData);
 
 		//Obtener los atributos desde preferencias
-		//--url = obtenerAtributoPreferencias('urlServicio');
-		//--attr1 = obtenerAtributoPreferencias('attr1');
+		url = obtenerAtributoPreferencias('urlServicio');
+		attr1 = obtenerAtributoPreferencias('attr1');
 		//Variable para saber si se ejecuta en Ambiente de producción o debug
 		//(debug muestra los mensajes de código)
-		//--environment = obtenerAtributoPreferencias('environment');
+		environment = obtenerAtributoPreferencias('environment');
 
 		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
 		//----------------------------------------------------------------------------------
@@ -85,9 +85,11 @@
 		//--------------------------- CARGA DE DATOS  --------------------------------------
 		//----------------------------------------------------------------------------------
 
-		//--obtenerDatos();
 		//--logg("init", "entra en init", 82);
 		boolCambio = true;
+	}
+	function noData(msg){
+		console.log(msg);
 	}
 
 	/**
@@ -177,17 +179,20 @@
 	 * Swith between the graph options based on the two parameters.
 	 */
 	function presentar_datos(data) {
-
+		
 		if (boolCambio) {
+			
 			//logg("presentar_datos", data, 173);
 			//Borro todo item de lista. Dejar limpia la lista
 			$('#selectable').empty();
 			//Por cada item en los datos se agrega un item de lista
 			for (var i = 0; i < data.length; i++) {
-				$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].description + '</li>');
+				console.log(data[i]);
+				$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].description +' -- '+data[i].size+ '</li>');
 			}
-			var arrayItemsSeleccionados = [];
+			
 			//Pongo el comportamiento
+			var arrayItemsSeleccionados = [];
 			$("#selectable").selectable({
 				stop : function() {
 					arrayItemsSeleccionados.length = 0;
@@ -195,15 +200,13 @@
 						var index = $("#selectable li").index(this);
 						arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
 					});
+					console.log(JSON.stringify(arrayItemsSeleccionados));
 					ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
 					//logg("presentar_datos", "Wiring: " + JSON.stringify(arrayItemsSeleccionados), 163);
 					
 					//wiring the chromosome number
 					// TODO: Quitar comentario
 					//MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
-					
-					//Envio los datos al servidor
-					//enviarDatosAlServidor(JSON.stringify(arrayItemsSeleccionados));
 				}
 			});
 			boolCambio = false;
@@ -219,56 +222,20 @@
 		boolCambio = true;
 		obtenerDatos();
 	}
-
-	/**
-	 * Genera la URL de consulta conlos parametros
-	 * @param urlSinFormato URL para agregar parámetros.
-	 * @return url URL completa y formateada o NULO si existe problemas en generación
-	 */
-	function generarParametrosEnURL(urlSinFormato) {
-		var urlResultante = null;
-		try {
-
-			if (urlSinFormato === 'undefined' || urlSinFormato === null) {
-				throw "La URL proporcionada es NULA o UNDEFINED";
-			}
-
-			//Si attr1 es nulo, se comunica al usuario la
-			//falta de parametros fundamentales (attr1)
-			if (attr1 === null) {
-				throw "El atributo 1 es nulo !!";
-			}
-
-			//Si la URL está mal formada, es arreglada dejándola en estado fundamental
-			// (sin parámetros, tomándo en cuenta el signo ?)
-			if (urlSinFormato.indexOf("?") != -1) {
-				var splitUrl = urlSinFormato.split("?");
-				// esta es la cadena limpia sin ?
-				urlResultante = splitUrl[0];
-			} else {
-				urlResultante = urlSinFormato;
-			}
-
-			//Se agrega a la URL el parametro
-			urlResultante = urlResultante.concat("?cmp=" + attr1);
-			return urlResultante;
-
-		} catch(err) {
-			// TODO: quitar comentario
-			//MashupPlatform.widget.log(err, MashupPlatform.log.ERROR);
-			return urlResultante;
-		}
-	};
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
 	 */
 	function obtenerAtributoPreferencias(nombreAtributo) {
+		//TODO: Se quitó para pruebas fuera de Wirecloud.
+		/*
 		var atributo = MashupPlatform.prefs.get(nombreAtributo);
 		if ( typeof (atributo) === 'undefined') {
 			atributo = null;
 		}
 		return atributo;
+		*/
+		return null;
 	};
 	/**
 	 * Function utilizada para los mensajes de DEBUG ( tipo INFORMACION), en el caso de que se ejecute el Widget en modo "development"
