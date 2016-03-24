@@ -21,13 +21,11 @@ var MODELO = {
 			};
 			//Acciones a realizar cuando se recibe un mensaje
 			that.conn.onmessage = function(e) {
+				var json;
 				if ( nameFunctionCallback instanceof Function && nameFunctionCallbackError instanceof Function) {
-
-					var json = MODELO.transformadorData(e.data);
+					json = MODELO.transformadorData(e.data);
 					//Se envia los datos a la funcion respectiva (callback)
 					nameFunctionCallback(JSON.parse(json));
-					
-					
 				} else {
 					nameFunctionCallbackError("fn No es una funcion válida");
 				}
@@ -72,8 +70,8 @@ var MODELO = {
 			bandera = true;
 
 		} catch(error) {
-			console.log(error);
-			//nameFunctionCallbackError(error);
+			//console.log(error);
+			nameFunctionCallbackError(error);
 		} finally {
 
 			if (!bandera) {

@@ -22,15 +22,10 @@ var MODELO = {
 			//Acciones a realizar cuando se recibe un mensaje
 			that.conn.onmessage = function(e) {
 				var json;
-				if ( nameFunctionCallback instanceof Function) {
-					try {
-						json = JSON.parse(e.data);
-						nameFunctionCallback(json);
-					} catch(error) {
-						nameFunctionCallbackError(error);
-					} finally {
-						nameFunctionCallbackError(e.data);
-					}
+				if ( nameFunctionCallback instanceof Function && nameFunctionCallbackError instanceof Function) {
+					json = MODELO.transformadorData(e.data);
+					//Se envia los datos a la funcion respectiva (callback)
+					nameFunctionCallback(JSON.parse(json));
 				} else {
 					nameFunctionCallbackError("fn No es una funcion válida");
 				}
@@ -43,5 +38,40 @@ var MODELO = {
 		} else {
 			nameFunctionCallbackError("La URL de conexión no es válida.");
 		}
+	},
+	/**
+	 * Transforma los datos recibidos por el servidor a datos que entiende el gráfico de Barras.
+	 * @param {Object} datos Datos del servidor.
+	 */
+	transformadorData : function(datos) {
+		var json;
+		var bandera = true;
+		try {
+			json = JSON.parse(datos);
+		} catch(error) {
+			nameFunctionCallbackError(error);
+			bandera = false;
+		} finally {
+			if (!bandera) {
+				json = [{
+					"chromosomeId" : 1,
+					"name" : "Chromosome 1",
+					"referenceId" : "Reference 1",
+					"curatedVariations" : null,
+					"calledVariations" : null,
+					"sizeCuratedVariations" : 0,
+					"sizeCalledVariations" : 12
+				}, {
+					"chromosomeId" : 2,
+					"name" : "Chromosome 2",
+					"referenceId" : "Reference 2",
+					"curatedVariations" : null,
+					"calledVariations" : null,
+					"sizeCuratedVariations" : 0,
+					"sizeCalledVariations" : 24
+				}];
+			}
+		}
+		return json;
 	}
 };

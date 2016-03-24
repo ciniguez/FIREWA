@@ -29,3 +29,31 @@ Environment: Production
 
 Note: GraphNvd3 functionality is implemented using wiring to send and receive _messages_ to other instance of the same widget. This allows showing how to use wiring, both for sending messages and for subscribing to them.
 Finally, users place graphs on wirecloud dashboard.  
+
+SETTINGS
+Url conecion: "ws://host:port/project_name/websocket_name"
+Example: "ws://localhost:8080/WebSockets/websocket/chat"
+
+INPUT DATA FORMAT:
+[
+	{
+		"chromosomeId":1,
+		"name":"Chromosome 1",
+		"referenceId":"Reference 1",
+		"curatedVariations":null,
+		"calledVariations":null,
+		"sizeCuratedVariations":0,
+		"sizeCalledVariations":12
+	},
+	{
+		"chromosomeId":2,
+		"name":"Chromosome 2",
+		"referenceId":"Reference 2",
+		"curatedVariations":null,
+		"calledVariations":null,
+		"sizeCuratedVariations":0,
+		"sizeCalledVariations":24
+	}
+]
+OUTPUT DATA FORMAT
+	["id_item_seleccionado"]

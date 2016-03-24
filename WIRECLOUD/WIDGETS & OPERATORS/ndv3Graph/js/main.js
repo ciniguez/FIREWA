@@ -17,8 +17,7 @@
 	 * Variables globales de la función
 	 */
 	"use strict";
-	//data a obtener desde un servicio web
-	var user_Data = null;
+
 	// url de servicio web consultada
 	var url = null;
 	// atributo 1 para el grafico
@@ -43,7 +42,8 @@
 	var environment = "";
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
-	var boolPresentacionWirecloud = false;
+	//Indicador para ejecucion en Wirecloud o fuera de wirecloud
+	var boolPresentacionWirecloud = true;
 	//Variable WebSocket
 	var ws;
 
@@ -93,7 +93,7 @@
 		//----------------------------------------------------------------------------------
 
 		logg("init", "Conectando a WebSocket con: " + url, 95);
-		ws = new MODELO.websocket(url, obtenerDatos, noData, "ChromosomevsVariant");
+		ws = new MODELO.websocket(url, presentarDatos, noData, "ChromosomevsVariant");
 
 		/*
 		 * Registro lo que ingresa como Preferencia
@@ -142,9 +142,9 @@
 		$("#msg").append("<p>NO DATA SENT</p><p>Have been set DEFAULT DATA</p><p>Server Data obtained==>" + msg + "</p>");
 	}
 
-	function obtenerDatos(data) {
+	function presentarDatos(data) {
 
-		//logg("init", "Tipo grafico: " + typeGraph, 130);
+		logg("init", "Tipo grafico: " + typeGraph, 147);
 
 		nv.addGraph(function() {
 			$('.bar-chart svg').empty();
@@ -160,9 +160,9 @@
 			d3.select('.bar-chart svg').datum(data).call(barChart);
 			nv.utils.windowResize(barChart.update);
 			barChart.discretebar.dispatch.on("elementClick", function(e) {
-				console.log(e);
+				logg("init", "pulsacion bar char: " + e, 163);
 				var obj = [e.index.toString()];
-				console.log(obj);
+				logg("init", "transformacion obj: " + obj, 163);
 				ws.conn.send(JSON.stringify(obj));
 			});
 			return barChart;
@@ -201,10 +201,12 @@
 		pal = itemString;
 		dispararCambio(itemString);
 	};
+	/**
+	 * Llamada al Websocket por demanda.
+	 */
 	function dispararCambio(cadena) {
-		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 311);
-		boolCambio = true;
-		obtenerDatos1();
+		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
+		MODELO.websocket.conn.send(cadena);
 	}
 
 	/**
@@ -212,7 +214,10 @@
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
 	 */
 	function obtenerAtributoPreferencias(nombreAtributo) {
-		var atributo = MashupPlatform.prefs.get(nombreAtributo);
+		var atributo;
+		if (boolPresentacionWirecloud) {
+			atributo = MashupPlatform.prefs.get(nombreAtributo);
+		}
 		if ( typeof (atributo) === 'undefined') {
 			atributo = null;
 		}
