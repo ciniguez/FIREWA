@@ -21,15 +21,14 @@
 	var user_Data = null;
 	// url de servicio web consultada
 	var url = null;
-	//var url = "http://localhost:8080/2-ProveedorRest/rest/vcf/graph?at1=chr&&agg=COUNT&&at2=idVariant_Called";
 	// atributo 1 para el grafico
-	var attr1 = "chr";
+	var attr1 = "";
 	// atributo 2 para el grafico
-	var attr2 = "chr";
+	var attr2 = "";
 	// tipo de gráfico
-	var typeGraph = "pieChart";
+	var typeGraph = "";
 	// funcion de agregacion
-	var prefAggregate = "COUNT";
+	var prefAggregate = "";
 	// cromosoma (parametro de entrada)
 	var pch = null;
 	// filtro (parametro de entrada)
@@ -41,12 +40,10 @@
 	//Alelo (parametro de entrada)
 	var inAllele = null;
 	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
-	var environment = "dev";
-	//Modulo de Angular.js
-	var app = null;
+	var environment = "";
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
-	var boolCambio = false;
+	var boolPresentacionWirecloud = false;
 	//Variable WebSocket
 	var ws;
 
@@ -56,87 +53,93 @@
 	function init() {
 
 		//Obtener los atributos desde preferencias
-		//TODO: Quitar Comentario
-		/*
-		url = obtenerAtributoPreferencias('urlServicio');
-		typeGraph = obtenerAtributoPreferencias('typeGraph');
-		attr1 = obtenerAtributoPreferencias('attr1');
-		attr2 = obtenerAtributoPreferencias('attr2');
-		prefAggregate = obtenerAtributoPreferencias('aggregate');
+		if (boolPresentacionWirecloud) {
+			url = obtenerAtributoPreferencias('urlServicio');
+			typeGraph = obtenerAtributoPreferencias('typeGraph');
+			attr1 = obtenerAtributoPreferencias('attr1');
+			attr2 = obtenerAtributoPreferencias('attr2');
+			prefAggregate = obtenerAtributoPreferencias('aggregate');
+			//Variable para saber si se ejecuta en Ambiente de producción o debug
+			//(debug muestra los mensajes de código)
+			environment = obtenerAtributoPreferencias('environment');
+		} else {
+			url = obtenerAtributoPreferencias('undefined');
+			typeGraph = obtenerAtributoPreferencias('undefined');
+			attr1 = obtenerAtributoPreferencias('undefined');
+			attr2 = obtenerAtributoPreferencias('undefined');
+			prefAggregate = obtenerAtributoPreferencias('undefined');
+			//Variable para saber si se ejecuta en Ambiente de producción o debug
+			//(debug muestra los mensajes de código)
+			environment = obtenerAtributoPreferencias('undefined');
 
-		//Variable para saber si se ejecuta en Ambiente de producción o debug
-		//(debug muestra los mensajes de código)
-		environment = obtenerAtributoPreferencias('environment');
-		*/
+			url = "ws://localhost:8080/WebSockets/websocket/chat";
+			environment = "dev";
+		}
 
 		//REGISTRO DE WIRING
-		/* Add register to wiring the Cromosome input value*/
-		//MashupPlatform.wiring.registerCallback("inputChromosome", handlerSlotChromosome.bind(this));
-		/* Add register to wiring the Filter input value*/
-		//MashupPlatform.wiring.registerCallback("inputFilter", handlerSlotFilter.bind(this));
-		/* Add register to wiring the Allele value */
-		//MashupPlatform.wiring.registerCallback("inputAllele", handlerSlotAllele.bind(this));
-		/* Add register to wiring the Position value */
-		//MashupPlatform.wiring.registerCallback("inputPos", handlerSlotPosition.bind(this));
+		if (boolPresentacionWirecloud) {
+			/* Add register to wiring the Cromosome input value*/
+			MashupPlatform.wiring.registerCallback("inputChromosome", handlerSlotChromosome.bind(this));
+			/* Add register to wiring the Filter input value*/
+			MashupPlatform.wiring.registerCallback("inputFilter", handlerSlotFilter.bind(this));
+			/* Add register to wiring the Allele value */
+			MashupPlatform.wiring.registerCallback("inputAllele", handlerSlotAllele.bind(this));
+			/* Add register to wiring the Position value */
+			MashupPlatform.wiring.registerCallback("inputPos", handlerSlotPosition.bind(this));
+		}
 
 		//----------------------------------------------------------------------------------
-		//--------------------------- OBJETOS GRAFICOS--------------------------------------
+		//--------------------------- CONEXION WEB SOCKET --------------------------------------
 		//----------------------------------------------------------------------------------
 
-		//logg("presentar_datos", "Registro de Modulo Angular", 165);
-
-		//----------------------------------------------------------------------------------
-		//--------------------------- GRAFICOS NVD3--------------------------------------------
-		//----------------------------------------------------------------------------------
-
-		ws = new MODELO.websocket(obtenerDatos,noData);
+		logg("init", "Conectando a WebSocket con: " + url, 95);
+		ws = new MODELO.websocket(url, obtenerDatos, noData, "ChromosomevsVariant");
 
 		/*
 		 * Registro lo que ingresa como Preferencia
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
 		 */
+		if (boolPresentacionWirecloud) {
+			MashupPlatform.prefs.registerCallback(function(new_values) {
+				parametroCambiado = "";
+				var boolean_flag = false;
+				if ('urlServicio' in new_values) {
+					url = obtenerAtributoPreferencias('urlServicio');
+					parametroCambiado = "url";
+				}
+				if ('typeGraph' in new_values) {
+					typeGraph = obtenerAtributoPreferencias('typeGraph');
+					parametroCambiado = "tipoGrafico";
+				}
+				if ('attr1' in new_values) {
+					attr1 = obtenerAtributoPreferencias('attr1');
+					parametroCambiado = "attr1";
+				}
+				if ('attr2' in new_values) {
+					parametroCambiado = "attr2";
+					attr2 = obtenerAtributoPreferencias('attr2');
+				}
+				if ('aggregate' in new_values) {
+					parametroCambiado = "attr2";
+					prefAggregate = obtenerAtributoPreferencias('aggregate');
+				}
+				if ('environment' in new_values) {
+					parametroCambiado = "env";
+					environment = obtenerAtributoPreferencias('environment');
+				}
+				//llamo a que se ejecute la obtención de datos desde el servidor
+				logg("init", "parametro cambiado: " + parametroCambiado, 111);
+				dispararCambio(parametroCambiado);
 
-		/*
-		 MashupPlatform.prefs.registerCallback(function(new_values) {
-		 parametroCambiado = "";
-		 var boolean_flag = false;
-		 if ('urlServicio' in new_values) {
-		 url = obtenerAtributoPreferencias('urlServicio');
-		 parametroCambiado = "url";
-		 }
-		 if ('typeGraph' in new_values) {
-		 typeGraph = obtenerAtributoPreferencias('typeGraph');
-		 parametroCambiado = "tipoGrafico";
-		 }
-		 if ('attr1' in new_values) {
-		 attr1 = obtenerAtributoPreferencias('attr1');
-		 parametroCambiado = "attr1";
-		 }
-		 if ('attr2' in new_values) {
-		 parametroCambiado = "attr2";
-		 attr2 = obtenerAtributoPreferencias('attr2');
-		 }
-		 if ('aggregate' in new_values) {
-		 parametroCambiado = "attr2";
-		 prefAggregate = obtenerAtributoPreferencias('aggregate');
-		 }
-		 if ('environment' in new_values) {
-		 parametroCambiado = "env";
-		 environment = obtenerAtributoPreferencias('environment');
-		 }
-		 //llamo a que se ejecute la obtención de datos desde el servidor
-		 logg("init", "parametro cambiado: " + parametroCambiado, 111);
-		 dispararCambio(parametroCambiado);
-
-		 });
-		 */
+			});
+		}
 
 	}
 
 	function noData(msg) {
 		$("#msg").empty();
-		$("#msg").append("<p>NO DATA SENT</p><p>Have been set DEFAULT DATA</p><p>Server Data obtained==>"+msg+"</p>");
+		$("#msg").append("<p>NO DATA SENT</p><p>Have been set DEFAULT DATA</p><p>Server Data obtained==>" + msg + "</p>");
 	}
 
 	function obtenerDatos(data) {
@@ -203,6 +206,7 @@
 		boolCambio = true;
 		obtenerDatos1();
 	}
+
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
@@ -222,7 +226,12 @@
 	 */
 	function logg(nombreFuncion, mensaje, linea) {
 		if (environment === "dev") {
-			MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			if (boolPresentacionWirecloud) {
+				MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			} else {
+				console.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea);
+			}
+
 		}
 	};
 	/**

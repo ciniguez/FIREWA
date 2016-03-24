@@ -47,7 +47,7 @@
 		}
 
 		//Inicio el WebSocket con la funcion callback, encargada de llenar los datos en pantalla.
-		ws = new MODELO.websocket(url, presentar_datos, noData);
+		ws = new MODELO.websocket(url, presentar_datos, noData,"SamplevsVariant");
 
 		//----------------------------------------------------------------------------------
 		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------

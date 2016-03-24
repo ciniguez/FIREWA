@@ -1,5 +1,11 @@
 var MODELO = {
-	websocket : function(urlWebSocket, nameFunctionCallback, nameFunctionCallbackError) {
+	/***
+	 * @param {Object} urlWebSocket Url  WebSocket de conexión al servidor
+	 * @param {Object} nameFunctionCallback Función a ejecutarse cuando se reciba cdatos del servidor
+	 * @param {Object} nameFunctionCallbackError Functión a ejecutarse cuando se reciba error del servidor
+	 * @param {Object} idWebSocket Nombre identificativo del Websocket para que el Servidor lo almacene.
+	 */
+	websocket : function(urlWebSocket, nameFunctionCallback, nameFunctionCallbackError, idWebSocket) {
 		if (MODELO.websocket.singleInstance)
 			return Webskt.singleInstance;
 		var that = this;
@@ -8,7 +14,7 @@ var MODELO = {
 			that.conn = new WebSocket(urlWebSocket);
 			that.conn.onopen = function() {
 				console.log('connected!');
-				that.conn.send("SamplevsVariant");
+				that.conn.send(idWebSocket);
 			};
 			that.conn.onerror = function(error) {
 				console.log("webSocket Error " + error);
