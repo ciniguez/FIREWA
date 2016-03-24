@@ -52,11 +52,4 @@ Requisitos especificos:
 
 5. Persistencia:
     - No procede.
-6. Formato de Datos a recibir:
-	{"id":"id","description":"description","calledVariations":null,"size":0} 
-	
-	[{"id": id_item_1, "description": text_description},
-	{"id": id_item_2, "description": text_description}
-	{"id": id_item_3, "description": text_description}]
-7. Formato de salida de datos:
-	[id_item_seleccionado_1,id_item_seleccionado_2,id_item_seleccionado_n ]
+

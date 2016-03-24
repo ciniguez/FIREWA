@@ -2,14 +2,10 @@
 /*global MashupPlatform StyledElements Vcard NGSI*/
 
 /**
- * Esta función es una función anónima que se ejecuta inmediatamente.
- * La función está compuesta por:
- * 1.- Variables globales de la función
- * 2.- Función init() que inicializa las variables. Principalmente lee de preferencias la URL del Servicio Web del cual se obtendrán los datos
- * 3.- Función obtenerDatos que recupera los datos desde el servicio web. En caso de éxito procede a mostrar los datos
- * 4.- Función presentar_datos() que tiene el código de Angular para mostrar el gráfico con los datos provistos
- * 5.- document.addEventListener('load', init.bind(this), true); que se ejecuta al terminar la carga del HTML completo y
- * llama a la función init() del punto 2.
+ * Controlador de Widget Lista
+ * OBJETIVO: Presentar una lista de items provenientes de la consulta por WebSockets a un servidor indicado.
+ * La selección de uno o varios items produce el envío de la información hacia Servidor a través del WebSocket previamente conectado.
+ *
  */
 (function() {
 
@@ -18,199 +14,117 @@
 	 */
 	"use strict";
 	// url de servicio web consultada
-	var url = "http://server:puerto/appName/getlista?cmp=“campo";
+	var url = "";
 	// atributo 1 para el grafico
 	var attr1 = "chr";
 	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
 	var environment = "dev";
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
-	var boolCambio = false;
+	var boolPresentacionWirecloud = false;
 	//variable para el WebSocket
-	var ws; 
-	
+	var ws;
 
 	/**
 	 * Inicialización de variables
 	 */
 	function init() {
-		//Inicio el WebSocket con la funcion callback, encargada de que llena los datos en pantalla.
-		ws = new MODELO.websocket(presentar_datos, noData);
-
+		//Ocultar el mensaje de errores al iniciar el widget.
+		$("#msg").hide();
 		//Obtener los atributos desde preferencias
-		url = obtenerAtributoPreferencias('urlServicio');
-		attr1 = obtenerAtributoPreferencias('attr1');
-		//Variable para saber si se ejecuta en Ambiente de producción o debug
-		//(debug muestra los mensajes de código)
-		environment = obtenerAtributoPreferencias('environment');
+		if (boolPresentacionWirecloud) {
+			url = obtenerAtributoPreferencias('urlServicio');
+			attr1 = obtenerAtributoPreferencias('attr1');
+			environment = obtenerAtributoPreferencias('environment');
+			url = "ws://localhost:8080/WebSockets/websocket/chat";
+		} else {
+			url = obtenerAtributoPreferencias('undefined');
+			attr1 = obtenerAtributoPreferencias('undefined');
+			environment = obtenerAtributoPreferencias('undefined');
 
+			url = "ws://localhost:8080/WebSockets/websocket/chat";
+			environment = "dev";
+		}
+
+		//Inicio el WebSocket con la funcion callback, encargada de llenar los datos en pantalla.
+		ws = new MODELO.websocket(url, presentar_datos, noData);
+
+		//----------------------------------------------------------------------------------
 		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
 		//----------------------------------------------------------------------------------
 		/*
-		* Registro lo que ingresa como Preferencia
-		* Si existe un cambio en un parámetro de preferencias, este método se dispara
-		* para obtener el nuevo valor y llama a presentar los datos en el gráfico
-		*/
-		/*
-		MashupPlatform.prefs.registerCallback(function(new_values) {
-		parametroCambiado = "";
-		var boolean_flag = false;
-		if ('urlServicio' in new_values) {
-		url = obtenerAtributoPreferencias('urlServicio');
-		parametroCambiado = "url";
-		}
-		if ('attr1' in new_values) {
-		attr1 = obtenerAtributoPreferencias('attr1');
-		parametroCambiado = "attr1";
-		}
-		if ('environment' in new_values) {
-		parametroCambiado = "env";
-		environment = obtenerAtributoPreferencias('environment');
-		}
-		//llamo a que se ejecute la obtención de datos desde el servidor
-		logg("init", "parametro cambiado: " + parametroCambiado, 111);
-		dispararCambio(parametroCambiado);
-
-		});
-		*/
-
-		//----------------------------------------------------------------------------------
-		//--------------------------- CARGA DE DATOS  --------------------------------------
-		//----------------------------------------------------------------------------------
-
-		//------------ !!!!! QUITAR CUANDO HAYA SERVIDOR -----------------------------------
-		url = null;
-		//----------------------------------------------------------------------------------
-
-		//--------------------------- CARGA DE DATOS  --------------------------------------
-		//----------------------------------------------------------------------------------
-
-		//--logg("init", "entra en init", 82);
-		boolCambio = true;
-	}
-	function noData(msg){
-		console.log(msg);
-	}
-
-	/**
-	 * Enviar los datos al servidor
-	 */
-	function enviarDatosAlServidor(datosJSON) {
-
-		//Generar la URL con todos los parametros de consulta
-		var urlResultado = generarParametrosEnURL(url);
-		logg("obtenerDatos", "trabajando con url: " + urlResultado, 129);
-
-		if (urlResultado !== null) {
-			//Realizar la llamada al Servicio Web REST
-			MashupPlatform.http.makeRequest(urlResultado, {
-				method : 'POST',
-				postBody : datosJSON,
-				contentType : "application/json",
-				onSuccess : function(response) {
-					logg("enviarDatosAlServidor", "Envio al Servidor con Exito", 114);
-				},
-				onError : function() {
-					MashupPlatform.widget.log("Error en Envio a Server", MashupPlatform.log.ERROR);
-					onError();
+		 * Registro lo que ingresa como Preferencia
+		 * Si existe un cambio en un parámetro de preferencias, el método se dispara
+		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
+		 */
+		if (boolPresentacionWirecloud) {
+			MashupPlatform.prefs.registerCallback(function(new_values) {
+				parametroCambiado = "";
+				var boolean_flag = false;
+				if ('urlServicio' in new_values) {
+					url = obtenerAtributoPreferencias('urlServicio');
+					parametroCambiado = "url";
 				}
-			});
-		} else {
-			MashupPlatform.widget.log("Error: ObtenerDatos->La URL es NULA", MashupPlatform.log.ERROR);
-		}
-	}
-
-	/**
-	 * Recuperar los datos desde el servicio web
-	 */
-	function obtenerDatos() {
-
-		//Generar la URL con todos los parametros de consulta
-		//TODO Cambiar cuando haya servidor
-		//var urlResultado = generarParametrosEnURL(url);
-		var urlResultado = null;
-		//FIN CAMBIO
-
-		logg("obtenerDatos", "trabajando con url: " + urlResultado, 129);
-
-		if (urlResultado !== null) {
-			//Realizar la llamada al Servicio Web REST
-			MashupPlatform.http.makeRequest(urlResultado, {
-				method : 'GET',
-				onSuccess : function(response) {
-					//Obtener los datos
-					user_Data = JSON.parse(response.responseText);
-
-					if (user_Data.error) {
-						MashupPlatform.widget.log("Error en Procesamiento", MashupPlatform.log.ERROR);
-						onError();
-					} else {
-						//Presentar los Datos en el Gráfico
-						presentar_datos(user_Data);
-					}
-				},
-				onError : function() {
-					MashupPlatform.widget.log("Error en Procesamiento - final", MashupPlatform.log.ERROR);
-					onError();
+				if ('attr1' in new_values) {
+					attr1 = obtenerAtributoPreferencias('attr1');
+					parametroCambiado = "attr1";
 				}
+				if ('environment' in new_values) {
+					parametroCambiado = "env";
+					environment = obtenerAtributoPreferencias('environment');
+				}
+				//llamo a que se ejecute la obtención de datos desde el servidor
+				logg("init", "parametro cambiado: " + parametroCambiado, 111);
+				dispararCambio(parametroCambiado);
+
 			});
-		} else {
-			//MashupPlatform.widget.log("Error: ObtenerDatos->La URL es NULA", MashupPlatform.log.ERROR);
-			//TODO eliminar cuando haya servidor
-			var data = [];
-			data.push({
-				"id" : 1,
-				"description" : "Sample 1"
-			});
-			data.push({
-				"id" : 2,
-				"description" : "Sample 2"
-			});
-			data.push({
-				"id" : 3,
-				"description" : "Sample 3"
-			});
-			presentar_datos(data);
-			// FIN TODO
 		}
+
 	}
 
 	/**
-	 * Swith between the graph options based on the two parameters.
+	 * Esta funcion es llamada cuando no se encontró datos en el servidor.
+	 */
+	function noData(msg) {
+		$("#msg").empty();
+		$("#msg").append("<p>" + msg + "</p>");
+		$("#msg").show();
+
+		$('#selectable').empty();
+		$("#selectable").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
+	}
+
+	/**
+	 * Present UI on screen
+	 * @param data Datos para llenar en pantalla. La estructura de la
+	 * data debe ser igual a la indicada en la documentación de requerimientos.
 	 */
 	function presentar_datos(data) {
-		
-		if (boolCambio) {
-			
-			//logg("presentar_datos", data, 173);
-			//Borro todo item de lista. Dejar limpia la lista
-			$('#selectable').empty();
-			//Por cada item en los datos se agrega un item de lista
-			for (var i = 0; i < data.length; i++) {
-				console.log(data[i]);
-				$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].description +' -- '+data[i].size+ '</li>');
-			}
-			
-			//Pongo el comportamiento
-			var arrayItemsSeleccionados = [];
-			$("#selectable").selectable({
-				stop : function() {
-					arrayItemsSeleccionados.length = 0;
-					$(".ui-selected", this).each(function() {
-						var index = $("#selectable li").index(this);
-						arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
-					});
-					console.log(JSON.stringify(arrayItemsSeleccionados));
-					ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
-					//logg("presentar_datos", "Wiring: " + JSON.stringify(arrayItemsSeleccionados), 163);
-					
-					//wiring the chromosome number
-					// TODO: Quitar comentario
-					//MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
-				}
-			});
-			boolCambio = false;
+		logg("presentar_datos", data, 173);
+		//Borro todo item de lista. Dejar limpia la lista
+		$('#selectable').empty();
+		//Por cada item en los datos se agrega un item de lista
+		for (var i = 0; i < data.length; i++) {
+			logg("presentar_datos", "datos enviados: " + data[i], 107);
+			$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].description + ' -- ' + data[i].size + '</li>');
 		}
+
+		//Comportamiento al hacer click en uno o varios de los items.
+		var arrayItemsSeleccionados = [];
+		$("#selectable").selectable({
+			stop : function() {
+				arrayItemsSeleccionados.length = 0;
+				$(".ui-selected", this).each(function() {
+					var index = $("#selectable li").index(this);
+					arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
+				});
+				logg("presentar_datos", "datos enviados: " + JSON.stringify(arrayItemsSeleccionados), 107);
+				//Envío de datos al Servidor mediante WebSocket y por Wiring
+				logg("presentar_datos", "datos enviados: " + JSON.stringify(arrayItemsSeleccionados), 107);
+				ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
+				MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
+			}
+		});
 
 	}
 
@@ -219,23 +133,22 @@
 	 */
 	function dispararCambio(cadena) {
 		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
-		boolCambio = true;
-		obtenerDatos();
+		MODELO.websocket.conn.send(cadena);
 	}
+
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
 	 */
 	function obtenerAtributoPreferencias(nombreAtributo) {
-		//TODO: Se quitó para pruebas fuera de Wirecloud.
-		/*
-		var atributo = MashupPlatform.prefs.get(nombreAtributo);
+		var atributo;
+		if (boolPresentacionWirecloud) {
+			atributo = MashupPlatform.prefs.get(nombreAtributo);
+		}
 		if ( typeof (atributo) === 'undefined') {
 			atributo = null;
 		}
 		return atributo;
-		*/
-		return null;
 	};
 	/**
 	 * Function utilizada para los mensajes de DEBUG ( tipo INFORMACION), en el caso de que se ejecute el Widget en modo "development"
@@ -245,7 +158,12 @@
 	 */
 	function logg(nombreFuncion, mensaje, linea) {
 		if (environment === "dev") {
-			MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			if (boolPresentacionWirecloud) {
+				MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			} else {
+				console.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea);
+			}
+
 		}
 	};
 	/**

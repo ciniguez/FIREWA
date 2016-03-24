@@ -16,7 +16,7 @@
 	<contents src="index.html" useplatformstyle="true"/>
 	<rendering width="5" height="15"/>
 	<preferences>
-		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="http://localhost:8080/2-ProveedorRest/rest/vcf/graph" />
+		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="" />
 		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chr">
 			<option label="Chromosome" value="chr"/>
 			<option label="Variantes" value="idVariant_Called"/>
