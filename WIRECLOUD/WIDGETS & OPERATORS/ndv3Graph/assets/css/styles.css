@@ -20,4 +20,8 @@
 #msg p{
 	font-size: 1em;
 	color: red;
+	line-height: 1.2;
+}
+#msg p span{
+	color: blue;
 }

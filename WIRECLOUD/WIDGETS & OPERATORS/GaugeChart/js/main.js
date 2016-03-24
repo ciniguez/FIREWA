@@ -18,10 +18,16 @@
 	 */
 	"use strict";
 	// url de servicio web consultada
-	var url = "http://localhost:8080/2-ProveedorRest/rest/variacion/cromosoma?chr=1";
+	var url = "";
 	// atributo 1 para el grafico. Por default se tomará "chr"
 	// puede tomar los siguientes valores:chr, referenceAllele", altAlleles, quality, filter, format
-	var domain = "chr";
+	var domain = "";
+	//Indicador para ejecucion en Wirecloud o fuera de wirecloud
+	var boolPresentacionWirecloud = false;
+	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
+	var environment = "";
+	//Variable WebSocket
+	var ws;
 
 	/**
 	 * Inicialización de variables
@@ -29,33 +35,57 @@
 	function init() {
 
 		//Obtener los atributos desde preferencias
-		//url = obtenerAtributoPreferencias('urlServicio');
-		//domain = obtenerAtributoPreferencias('attr1');
-		//Variable para saber si se ejecuta en Ambiente de producción o debug
-		//(debug muestra los mensajes de código)
-		//environment = obtenerAtributoPreferencias('environment');
+		if (boolPresentacionWirecloud) {
+			url = obtenerAtributoPreferencias('urlServicio');
+			domain = obtenerAtributoPreferencias('attr1');
+			//Variable para saber si se ejecuta en Ambiente de producción o debug
+			//(debug muestra los mensajes de código)
+			environment = obtenerAtributoPreferencias('environment');
+		} else {
+			url = obtenerAtributoPreferencias('undefined');
+			domain = obtenerAtributoPreferencias('undefined');
+			//Variable para saber si se ejecuta en Ambiente de producción o debug
+			//(debug muestra los mensajes de código)
+			environment = obtenerAtributoPreferencias('undefined');
+
+			url = "ws://localhost:8080/WebSockets/websocket/chat";
+			domain = "chr";
+			environment = "dev";
+		}
 
 		//REGISTRO DE WIRING
-		/* Add register to wiring the Cromosome input value*/
-		//MashupPlatform.wiring.registerCallback("inputDominio", handlerSlotDomine.bind(this));
+		if (boolPresentacionWirecloud) {
+			/* Add register to wiring the Cromosome input value*/
+			MashupPlatform.wiring.registerCallback("inputDominio", handlerSlotDomine.bind(this));
+		}
 
-		//logg("presentar_datos", "Registro de Modulo Angular", 165);
+		//----------------------------------------------------------------------------------
+		//--------------------------- CONEXION WEB SOCKET ----------------------------------
+		//----------------------------------------------------------------------------------
+
+		logg("init", "Conectando a WebSocket con: " + url, 95);
+		ws = new MODELO.websocket(url, presentar_datos, noData, "gauge1");
+
+		//----------------------------------------------------------------------------------
+		//--------------------------- CONFIGURACION DE GRAFICO----------------------------------
+		//----------------------------------------------------------------------------------
 
 		var gauge = c3.generate({
 			bindto : "#gauge",
 			data : {
 				columns : [['data', 91.4]],
-				type : 'gauge'
-				/*,
+				type : 'gauge',
+				/*
 				 onclick : function(d, i) {
 				 console.log("onclick", d, i);
 				 },
-				 onmouseover : function(d, i) {
-				 console.log("onmouseover", d, i);
-				 },
-				 onmouseout : function(d, i) {
-				 console.log("onmouseout", d, i);
-				 }*/
+				 */
+				onmouseover : function(d, i) {
+					//console.log("onmouseover", d, i);
+				},
+				onmouseout : function(d, i) {
+					//console.log("onmouseout", d, i);
+				}
 			},
 			gauge : {
 				//        label: {
@@ -66,7 +96,7 @@
 				//        },
 				//    min: 0, // 0 is default, //can handle negative min e.g. vacuum / voltage / current flow / rate of change
 				//    max: 100, // 100 is default
-				//    units: ' %',
+				units : ' %'
 				//    width: 39 // for adjusting arc thickness
 			},
 			color : {
@@ -84,30 +114,6 @@
 
 		setTimeout(function() {
 			gauge.load({
-				columns : [['data', 10]]
-			});
-		}, 1000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 50]]
-			});
-		}, 2000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 70]]
-			});
-		}, 3000);
-
-		setTimeout(function() {
-			gauge.load({
-				columns : [['data', 0]]
-			});
-		}, 4000);
-
-		setTimeout(function() {
-			gauge.load({
 				columns : [['data', 100]]
 			});
 		}, 5000);
@@ -117,132 +123,77 @@
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
 		 */
-		/*
-		MashupPlatform.prefs.registerCallback(function(new_values) {
-			parametroCambiado = "";
-			var boolean_flag = false;
-			if ('urlServicio' in new_values) {
-				url = obtenerAtributoPreferencias('urlServicio');
-				parametroCambiado = "url";
-			}
-			if ('attr1' in new_values) {
-				domain = obtenerAtributoPreferencias('attr1');
-				parametroCambiado = "attr1";
-			}
-			if ('environment' in new_values) {
-				parametroCambiado = "env";
-				environment = obtenerAtributoPreferencias('environment');
-			}
-			//llamo a que se ejecute la obtención de datos desde el servidor
-			logg("init", "parametro cambiado: " + parametroCambiado, 111);
-			obtenerDatos();
+		if (boolPresentacionWirecloud) {
 
-		});
-		*/
+			MashupPlatform.prefs.registerCallback(function(new_values) {
+				parametroCambiado = "";
+				var boolean_flag = false;
+				if ('urlServicio' in new_values) {
+					url = obtenerAtributoPreferencias('urlServicio');
+					parametroCambiado = "url";
+				}
+				if ('attr1' in new_values) {
+					domain = obtenerAtributoPreferencias('attr1');
+					parametroCambiado = "attr1";
+				}
+				if ('environment' in new_values) {
+					parametroCambiado = "env";
+					environment = obtenerAtributoPreferencias('environment');
+				}
+				//llamo a que se ejecute la obtención de datos desde el servidor
+				logg("init", "parametro cambiado: " + parametroCambiado, 111);
+				dispararCambio(parametroCambiado);
+
+			});
+		}
 
 	}
 
+	function noData(msg) {
+		$("#msg").empty();
+		$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
+		$("#msg").fadeOut(5000);
+	}
+
 	/**
-	 * Recuperar los datos desde el servicio web
+	 * Llamada al Websocket por demanda.
 	 */
-	function obtenerDatos() {
-
-		//Generar la URL con todos los parametros de consulta
-		var urlResultado = generarParametrosEnURL(url);
-		logg("obtenerDatos", "trabajando con url: " + urlResultado, 129);
-
-		if (urlResultado !== null) {
-			//Realizar la llamada al Servicio Web REST
-			MashupPlatform.http.makeRequest(urlResultado, {
-				method : 'GET',
-				onSuccess : function(response) {
-					//Obtener los datos
-					var user_Data = JSON.parse(response.responseText);
-
-					if (user_Data.error) {
-						MashupPlatform.widget.log("Error en Procesamiento", MashupPlatform.log.ERROR);
-						onError();
-					} else {
-						//Presentar los Datos en el Gráfico
-						presentar_datos(user_Data);
-					}
-				},
-				onError : function() {
-					MashupPlatform.widget.log("Error en Procesamiento - final", MashupPlatform.log.ERROR);
-					onError();
-				}
-			});
-		} else {
-			MashupPlatform.widget.log("Error: ObtenerDatos->La URL es NULA", MashupPlatform.log.ERROR);
-		}
+	function dispararCambio(cadena) {
+		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
+		MODELO.websocket.conn.send(cadena);
 	}
 
 	/**
 	 * Swith between the graph options based on the two parameters.
 	 */
 	function presentar_datos(data) {
-		//Cargo el Gauge con la nueva data
-		var datos = {
-			columns : [['data', data.valor]]
-		};
-		gauge.load(datos);
+		if (data === null || !( data instanceof Array)) {
+			//Cargo el Gauge con la nueva data
+			data = {
+				columns : [['data', data.valor]]
+			};
+		}
+
+		gauge.load(data);
 	}
 
-	/**
-	 * Genera la URL de consulta conlos parametros
-	 * @param urlSinFormato URL para agregar parámetros.
-	 * @return url URL completa y formateada o NULO si existe problemas en generación
-	 */
-	function generarParametrosEnURL(urlSinFormato) {
-		var urlResultante = null;
-		try {
-
-			if (urlSinFormato === 'undefined' || urlSinFormato === null) {
-				throw "La URL proporcionada es NULA o UNDEFINED";
-			}
-
-			//Si attr1 y attr2 son nulos, se comunica al usuario la
-			//falta de parametros fundamentales (attr1 y attr2)
-			if (domain === null) {
-				throw "El dominio es nulo !!";
-			}
-
-			//Si la URL está mal formada, es arreglada dejándola en estado fundamental
-			// (sin parámetros, tomándo en cuenta el signo ?)
-			if (urlSinFormato.indexOf("?") != -1) {
-				var splitUrl = urlSinFormato.split("?");
-				// esta es la cadena limpia sin ?
-				urlResultante = splitUrl[0];
-			} else {
-				urlResultante = urlSinFormato;
-			}
-
-			if (domain != null) {
-				urlResultante = urlResultante.concat("?var="+domain+"&&value="+3);
-			}
-
-			return urlResultante;
-
-		} catch(err) {
-
-			MashupPlatform.widget.log("Error: URL no bien formada: " + urlResultante, MashupPlatform.log.INFO);
-			return urlResultante;
-		}
-	};
 	/**
 	 * Obtener datos enviados al Widget
 	 * @param {Object} itemString
 	 */
 	var handlerSlotDomine = function handlerDomine(itemString) {
 		domain = itemString;
-		obtenerDatos();
+		dispararCambio(itemString);
 	};
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
 	 */
 	function obtenerAtributoPreferencias(nombreAtributo) {
-		var atributo = MashupPlatform.prefs.get(nombreAtributo);
+		var atributo;
+		if (boolPresentacionWirecloud) {
+			atributo = MashupPlatform.prefs.get(nombreAtributo);
+		}
 		if ( typeof (atributo) === 'undefined') {
 			atributo = null;
 		}
@@ -256,7 +207,12 @@
 	 */
 	function logg(nombreFuncion, mensaje, linea) {
 		if (environment === "dev") {
-			MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			if (boolPresentacionWirecloud) {
+				MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			} else {
+				console.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea);
+			}
+
 		}
 	};
 	/**

@@ -21,7 +21,7 @@
 	var environment = "dev";
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
-	var boolPresentacionWirecloud = false;
+	var boolPresentacionWirecloud = true;
 	//variable para el WebSocket
 	var ws;
 
@@ -29,14 +29,11 @@
 	 * Inicialización de variables
 	 */
 	function init() {
-		//Ocultar el mensaje de errores al iniciar el widget.
-		$("#msg").hide();
 		//Obtener los atributos desde preferencias
 		if (boolPresentacionWirecloud) {
 			url = obtenerAtributoPreferencias('urlServicio');
 			attr1 = obtenerAtributoPreferencias('attr1');
 			environment = obtenerAtributoPreferencias('environment');
-			url = "ws://localhost:8080/WebSockets/websocket/chat";
 		} else {
 			url = obtenerAtributoPreferencias('undefined');
 			attr1 = obtenerAtributoPreferencias('undefined');
@@ -87,8 +84,9 @@
 	 */
 	function noData(msg) {
 		$("#msg").empty();
-		$("#msg").append("<p>" + msg + "</p>");
-		$("#msg").show();
+		$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
+		$("#msg").fadeOut(5000);
+		
 
 		$('#selectable').empty();
 		$("#selectable").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');

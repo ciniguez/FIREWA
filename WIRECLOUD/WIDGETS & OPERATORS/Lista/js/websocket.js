@@ -49,7 +49,7 @@ var MODELO = {
 		try {
 			json = JSON.parse(datos);
 		} catch(error) {
-			nameFunctionCallbackError(error);
+			console.log(error);
 			bandera = false;
 		} finally {
 			if (!bandera) {

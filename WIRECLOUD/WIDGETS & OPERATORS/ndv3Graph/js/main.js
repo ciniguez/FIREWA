@@ -43,7 +43,7 @@
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
 	//Indicador para ejecucion en Wirecloud o fuera de wirecloud
-	var boolPresentacionWirecloud = true;
+	var boolPresentacionWirecloud = false;
 	//Variable WebSocket
 	var ws;
 
@@ -73,6 +73,7 @@
 			environment = obtenerAtributoPreferencias('undefined');
 
 			url = "ws://localhost:8080/WebSockets/websocket/chat";
+			typeGraph = "pieChart";
 			environment = "dev";
 		}
 
@@ -94,6 +95,7 @@
 
 		logg("init", "Conectando a WebSocket con: " + url, 95);
 		ws = new MODELO.websocket(url, presentarDatos, noData, "ChromosomevsVariant");
+		//----------------------------------------------------------------------------------
 
 		/*
 		 * Registro lo que ingresa como Preferencia
@@ -139,34 +141,168 @@
 
 	function noData(msg) {
 		$("#msg").empty();
-		$("#msg").append("<p>NO DATA SENT</p><p>Have been set DEFAULT DATA</p><p>Server Data obtained==>" + msg + "</p>");
+		$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
+		$("#msg").fadeOut(5000);
 	}
 
 	function presentarDatos(data) {
 
+		$(".chart svg").empty();
 		logg("init", "Tipo grafico: " + typeGraph, 147);
+		var chart;
+		try {
+			if (typeGraph === null) {
+				throw "Graph type nos selected!!";
+			}
+			if (typeGraph === "pieChart") {
+				chart = pieChart(data);
+			}
+			if (typeGraph === "discreteBarChart") {
+				chart = discreteBarChart(data);
+			}
+			nv.addGraph(chart);
+		} catch(error) {
+			noData(error);
+		}
+	}
 
-		nv.addGraph(function() {
-			$('.bar-chart svg').empty();
+	/**
+	 * Return a Pie Chart with data given
+	 */
+	function pieChart(data) {
+		if (data === null || !( data instanceof Array)) {
+			//Default data
+			data = [{
+				"label" : "One",
+				"value" : 29.765957771107
+			}, {
+				"label" : "Two",
+				"value" : 0
+			}, {
+				"label" : "Three",
+				"value" : 32.807804682612
+			}, {
+				"label" : "Four",
+				"value" : 196.45946739256
+			}];
+		}
+		logg("init", "Data pieChart" + data, 187);
 
-			var barChart = nv.models.discreteBarChart().x(function(d) {
-				return d.label;
-			}).y(function(d) {
-				return d.value;
-			}).staggerLabels(true).tooltips(false).showValues(true).duration(250);
+		$(".chart svg").empty();
 
-			barChart.yAxis.axisLabel('Price change in USD');
+		var chart = nv.models.pieChart().x(function(d) {
+			return d.label;
+		}).y(function(d) {
+			return d.value;
+		}).showLabels(true)//Display pie labels
+		.labelThreshold(.05)//Configure the minimum slice size for labels to show up
+		.labelType("percent")//Configure what type of data to show in the label. Can be "key", "value" or "percent"
+		.donut(true)//Turn on Donut mode. Makes pie chart look tasty!
+		.donutRatio(0.35)//Configure how big you want the donut hole size to be.
+		;
 
-			d3.select('.bar-chart svg').datum(data).call(barChart);
-			nv.utils.windowResize(barChart.update);
-			barChart.discretebar.dispatch.on("elementClick", function(e) {
-				logg("init", "pulsacion bar char: " + e, 163);
-				var obj = [e.index.toString()];
-				logg("init", "transformacion obj: " + obj, 163);
-				ws.conn.send(JSON.stringify(obj));
-			});
-			return barChart;
+		d3.select(".chart svg").datum(data).transition().duration(350).call(chart);
+		nv.utils.windowResize(chart.update);
+
+		chart.pie.dispatch.on("elementClick", function(e) {
+			logg("init", "pulsacion pieChar: " + e, 207);
+			var obj = [e.index.toString()];
+			logg("init", "transformacion obj: " + obj, 163);
+			ws.conn.send(JSON.stringify(obj));
 		});
+
+		return chart;
+
+	}
+
+	/**
+	 * Return a Discrte Bar Chart with data given
+	 */
+	function discreteBarChart(data) {
+		if (data === null) {
+			//default data
+			data = [{
+				key : "Cumulative Return",
+				values : [{
+					"label" : "A Label",
+					"value" : -29.765957771107
+				}, {
+					"label" : "B Label",
+					"value" : 0
+				}, {
+					"label" : "C Label",
+					"value" : 32.807804682612
+				}]
+			}];
+		} else {
+			data = JSON.parse(transformadorDataDiscreteBarChar(data));
+		}
+
+		$('.chart svg').empty();
+
+		var chart = nv.models.discreteBarChart().x(function(d) {
+			return d.label;
+		}).y(function(d) {
+			return d.value;
+		}).staggerLabels(false).tooltips(false).showValues(true).duration(250);
+
+		chart.yAxis.axisLabel('Price change in USD');
+
+		d3.select('.chart svg').datum(data).call(chart);
+		nv.utils.windowResize(chart.update);
+		chart.discretebar.dispatch.on("elementClick", function(e) {
+			logg("init", "pulsacion bar char: " + e, 163);
+			var obj = [e.index.toString()];
+			logg("init", "transformacion obj: " + obj, 163);
+			ws.conn.send(JSON.stringify(obj));
+		});
+		return chart;
+
+	}
+
+	/**
+	 * Transforma los datos recibidos por el servidor a datos que entiende el gráfico de Barras.
+	 * @param {Object} datos Datos del servidor.
+	 */
+	function transformadorDataDiscreteBarChar(datos) {
+		var bandera = false;
+		var json;
+
+		var arrayContendor = new Array();
+		var objDataGrafico = new Object();
+		var valuesToDataGrafico = Array();
+
+		try {
+			if ( typeof datos === "undefined") {
+				throw "Tipo de datos enviados por Servidor son undefined!";
+			}
+			console.log(datos);
+			json = JSON.parse(datos);
+
+			//preparar json en formato que absorve el gráfico
+			for (var i = 0; i < json.length; i++) {
+				var v = new Object();
+				v.label = json[i].chromosomeId;
+				v.value = json[i].sizeCalledVariations;
+				v.color = '#00b19d';
+				valuesToDataGrafico.push(v);
+			}
+			//Agrego las propiedades key y values del objeto total
+			objDataGrafico.key = 'Cumulative Return';
+			objDataGrafico.values = valuesToDataGrafico;
+			//Agregar el objeto total al array raiz
+			arrayContendor.push(objDataGrafico);
+
+			//convertir el resultado en cadena de texto
+			json = JSON.stringify(arrayContendor);
+
+			return json;
+
+		} catch(error) {
+			console.log(error);
+			return null;
+		}
+
 	}
 
 	/**

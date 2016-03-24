@@ -34,7 +34,8 @@ SETTINGS
 Url conecion: "ws://host:port/project_name/websocket_name"
 Example: "ws://localhost:8080/WebSockets/websocket/chat"
 
-INPUT DATA FORMAT:
+INPUT DATA AND OUTPUT DATA
+DISCRETE BAR CHART IN:
 [
 	{
 		"chromosomeId":1,
@@ -55,5 +56,19 @@ INPUT DATA FORMAT:
 		"sizeCalledVariations":24
 	}
 ]
-OUTPUT DATA FORMAT
+DISCRETE BAR CHART OUT:
+	["id_item_seleccionado"]
+//----------------------------------------------
+PIE CHART IN:
+[
+    { 
+        "label": "One",
+        "value" : 29.765957771107
+    } , 
+    { 
+       "label": "Two",
+       "value" : 0
+    } , 
+]
+PIE CHART OUT:
 	["id_item_seleccionado"]
