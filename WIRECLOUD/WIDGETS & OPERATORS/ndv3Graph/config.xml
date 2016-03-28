@@ -17,6 +17,7 @@
 	<rendering width="5" height="10"/>
 	<preferences>
 		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="" />
+		<preference name="websocketIdentifier" type="text" label="WebSocket Identifier" description="Identifier name of websocket (unique)" default="" />
 		<preference name="typeGraph" type="list" label="Type :" description="Graph Type" default="pieChart">
 			<option label="Line" value="lineChart"/>
 			<option label="DiscreteBar" value="discreteBarChart"/>

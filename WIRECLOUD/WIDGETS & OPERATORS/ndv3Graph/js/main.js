@@ -10,7 +10,20 @@
  * 4.- Función presentar_datos() que tiene el código de Angular para mostrar el gráfico con los datos provistos
  * 5.- document.addEventListener('load', init.bind(this), true); que se ejecuta al terminar la carga del HTML completo y
  * llama a la función init() del punto 2.
+ * @author Carlos iniguez
  */
+
+//Si se cierra el Navegador, cerrar el WebSocket activo.
+window.onbeforeunload = function() {
+	if (MODELO.websocket.singleInstance) {
+		console.log(MODELO.websocket.singleInstance.conn.readyState);
+		if (MODELO.websocket.singleInstance.conn.readyState != WebSocket.CLOSED) {
+			MODELO.websocket.singleInstance.conn.close(1000);
+			console.log("ws cerrado");
+		}
+	}
+};
+
 (function() {
 
 	/**
@@ -45,13 +58,15 @@
 	//Indicador para ejecucion en Wirecloud o fuera de wirecloud
 	var boolPresentacionWirecloud = false;
 	//Variable WebSocket
-	var ws;
+	var ws = null;
+	//Nombre identificador del websocket para conexion al servidor
+	var identificadorWebSocket = null;
 
 	/**
 	 * Inicialización de variables
+	 * @author Carlos iniguez
 	 */
 	function init() {
-
 		//Obtener los atributos desde preferencias
 		if (boolPresentacionWirecloud) {
 			url = obtenerAtributoPreferencias('urlServicio');
@@ -59,6 +74,7 @@
 			attr1 = obtenerAtributoPreferencias('attr1');
 			attr2 = obtenerAtributoPreferencias('attr2');
 			prefAggregate = obtenerAtributoPreferencias('aggregate');
+			identificadorWebSocket = obtenerAtributoPreferencias('websocketIdentifier');
 			//Variable para saber si se ejecuta en Ambiente de producción o debug
 			//(debug muestra los mensajes de código)
 			environment = obtenerAtributoPreferencias('environment');
@@ -68,39 +84,43 @@
 			attr1 = obtenerAtributoPreferencias('undefined');
 			attr2 = obtenerAtributoPreferencias('undefined');
 			prefAggregate = obtenerAtributoPreferencias('undefined');
+			identificadorWebSocket = obtenerAtributoPreferencias('undentified');
 			//Variable para saber si se ejecuta en Ambiente de producción o debug
 			//(debug muestra los mensajes de código)
 			environment = obtenerAtributoPreferencias('undefined');
 
+			//local settings only by testing
 			url = "ws://localhost:8080/WebSockets/websocket/chat";
 			typeGraph = "pieChart";
 			environment = "dev";
+			identificadorWebSocket = "grap03";
 		}
 
 		//REGISTRO DE WIRING
 		if (boolPresentacionWirecloud) {
 			/* Add register to wiring the Cromosome input value*/
-			MashupPlatform.wiring.registerCallback("inputChromosome", handlerSlotChromosome.bind(this));
+			MashupPlatform.wiring.registerCallback("inputChromosome", handlerSlot.bind(this));
 			/* Add register to wiring the Filter input value*/
-			MashupPlatform.wiring.registerCallback("inputFilter", handlerSlotFilter.bind(this));
+			MashupPlatform.wiring.registerCallback("inputFilter", handlerSlot.bind(this));
 			/* Add register to wiring the Allele value */
-			MashupPlatform.wiring.registerCallback("inputAllele", handlerSlotAllele.bind(this));
+			MashupPlatform.wiring.registerCallback("inputAllele", handlerSlot.bind(this));
 			/* Add register to wiring the Position value */
-			MashupPlatform.wiring.registerCallback("inputPos", handlerSlotPosition.bind(this));
+			MashupPlatform.wiring.registerCallback("inputPos", handlerSlot.bind(this));
 		}
 
 		//----------------------------------------------------------------------------------
 		//--------------------------- CONEXION WEB SOCKET --------------------------------------
 		//----------------------------------------------------------------------------------
 
-		logg("init", "Conectando a WebSocket con: " + url, 95);
-		ws = new MODELO.websocket(url, presentarDatos, noData, "ChromosomevsVariant");
+		crearWebSocket();
+
 		//----------------------------------------------------------------------------------
 
 		/*
-		 * Registro lo que ingresa como Preferencia
+		 * Registro los datos desde Preferencias (fichero config.xml)
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
+		 * @author Carlos iniguez
 		 */
 		if (boolPresentacionWirecloud) {
 			MashupPlatform.prefs.registerCallback(function(new_values) {
@@ -130,6 +150,15 @@
 					parametroCambiado = "env";
 					environment = obtenerAtributoPreferencias('environment');
 				}
+				if ('websocketIdentifier' in new_values) {
+					parametroCambiado = "websocketIdentifier";
+					identificadorWebSocket = obtenerAtributoPreferencias('websocketIdentifier');
+					//Terminar el WebSocket anterior.
+					if (ws) {
+						ws.conn.close();
+						ws = null;
+					}
+				}
 				//llamo a que se ejecute la obtención de datos desde el servidor
 				logg("init", "parametro cambiado: " + parametroCambiado, 111);
 				dispararCambio(parametroCambiado);
@@ -139,12 +168,20 @@
 
 	}
 
+	/**
+	 * Presenta mensajes en la parte inferior del grafico (utilizada para feedback al usuario)
+	 * @author Carlos iniguez
+	 */
 	function noData(msg) {
 		$("#msg").empty();
 		$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
 		$("#msg").fadeOut(5000);
 	}
 
+	/**
+	 * Presenta los datos en los graficos estadisticos
+	 * @author Carlos iniguez
+	 */
 	function presentarDatos(data) {
 
 		$(".chart svg").empty();
@@ -168,6 +205,7 @@
 
 	/**
 	 * Return a Pie Chart with data given
+	 * @author Carlos iniguez
 	 */
 	function pieChart(data) {
 		if (data === null || !( data instanceof Array)) {
@@ -217,6 +255,7 @@
 
 	/**
 	 * Return a Discrte Bar Chart with data given
+	 * @author Carlos iniguez
 	 */
 	function discreteBarChart(data) {
 		if (data === null) {
@@ -263,6 +302,7 @@
 	/**
 	 * Transforma los datos recibidos por el servidor a datos que entiende el gráfico de Barras.
 	 * @param {Object} datos Datos del servidor.
+	 * @author Carlos iniguez
 	 */
 	function transformadorDataDiscreteBarChar(datos) {
 		var bandera = false;
@@ -308,46 +348,65 @@
 	/**
 	 * Obtener datos enviados al Widget
 	 * @param {Object} itemString
+	 * @author Carlos iniguez
 	 */
-	var handlerSlotChromosome = function handlerSlotChromosome(itemString) {
-		pch = itemString;
-		dispararCambio(itemString);
+	var handlerSlot = function handlerSlot(itemString) {
+		switch(itemString) {
+		case "inputChromosome":
+			pch = itemString;
+			break;
+		case "inputFilter":
+			pfil = itemString;
+			break;
+		case "inputAllele":
+			pal = itemString;
+			break;
+		case "inputPos":
+			ppos = itemString;
+			break;
+		case "websocketIdentifier":
+			identificadorWebSocket = itemString;
+			break;
+		}
+		if (itemString !== "" || itemString !== null) {
+			dispararCambio(itemString);
+		} else {
+			logg("handlerSlot", "No existe emparejamiento con la preferencia solicitada", 357);
+		}
 	};
 	/**
-	 * Obtener datos enviados al Widget
-	 * @param {Object} itemString
+	 * Establece la conexión con el servidord a traves de WebSocket
+	 * @author Carlos iniguez
 	 */
-	var handlerSlotFilter = function handlerSlotFilter(itemString) {
-		pfil = itemString;
-		dispararCambio(itemString);
-	};
-	/**
-	 * Obtener datos enviados al Widget
-	 * @param {Object} itemString
-	 */
-	var handlerSlotPosition = function handlerSlotPosition(itemString) {
-		ppos = itemString;
-		dispararCambio(itemString);
-	};
-	/**
-	 * Obtener datos enviados al Widget
-	 * @param {Object} itemString
-	 */
-	var handlerSlotAllele = function handlerSlotAllele(itemString) {
-		pal = itemString;
-		dispararCambio(itemString);
-	};
+	function crearWebSocket() {
+		logg("dispararCambio", "Conectando a WebSocket con: " + url, 372);
+		//Para la conexion con WebSocket se requiere el nombre identificador del widget para enviarlo al servidor.
+		if (identificadorWebSocket !== null) {
+			ws = new MODELO.websocket(url, presentarDatos, noData, identificadorWebSocket);
+		} else {
+			logg("init", "init: Se requiere configurar el ¡identificador de Websocket", 103);
+			noData("You must set the websocket identifier!");
+		}
+	}
+
 	/**
 	 * Llamada al Websocket por demanda.
+	 * @author Carlos iniguez
 	 */
 	function dispararCambio(cadena) {
-		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
-		MODELO.websocket.conn.send(cadena);
+		if (ws) {
+			ws.conn.send(cadena);
+			//MODELO.websocket.conn.send(cadena);
+		} else {
+			crearWebSocket();
+		}
+
 	}
 
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
+	 * @author Carlos iniguez
 	 */
 	function obtenerAtributoPreferencias(nombreAtributo) {
 		var atributo;
@@ -364,6 +423,7 @@
 	 * @param nombreFuncion Nombre de la funcion de donde se lanza el mensaje
 	 * @param mensaje Texto a mostrar en el mensaje de salida
 	 * @param linea Número de Linea de codigo correspondiente donde se ejecuta el mensaje
+	 * @author Carlos iniguez
 	 */
 	function logg(nombreFuncion, mensaje, linea) {
 		if (environment === "dev") {
@@ -378,6 +438,7 @@
 	/**
 	 * Llamada a la función (init() como inicializador)
 	 * NOTE: I have changed "DOMContentLoaded" for "load" beacause I need the whole HTML and resources loaded.
+	 * @author Carlos iniguez
 	 */
 	document.addEventListener('load', init.bind(this), true);
 

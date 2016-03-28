@@ -23,7 +23,7 @@
 	// puede tomar los siguientes valores:chr, referenceAllele", altAlleles, quality, filter, format
 	var domain = "";
 	//Indicador para ejecucion en Wirecloud o fuera de wirecloud
-	var boolPresentacionWirecloud = false;
+	var boolPresentacionWirecloud = true;
 	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
 	var environment = "";
 	//Variable WebSocket

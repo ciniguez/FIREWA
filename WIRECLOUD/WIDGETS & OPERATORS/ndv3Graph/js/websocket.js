@@ -6,8 +6,10 @@ var MODELO = {
 	 * @param {Object} idWebSocket Nombre identificativo del Websocket para que el Servidor lo almacene.
 	 */
 	websocket : function(urlWebSocket, nameFunctionCallback, nameFunctionCallbackError, idWebSocket) {
-		if (MODELO.websocket.singleInstance)
-			return Webskt.singleInstance;
+		if (MODELO.websocket.singleInstance){
+			return MODELO.websocket.singleInstance;
+		}
+			
 		var that = this;
 		MODELO.websocket.singleInstance = that;
 		if (urlWebSocket) {
