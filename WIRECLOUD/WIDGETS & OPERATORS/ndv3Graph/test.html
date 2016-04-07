@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	</head>
+	<body>
+		<h1>Ejecutando</h1>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script>
+			function A() {
+				this.hola = "soy A";
+				this.init = iniciar;
+			};
+			function iniciar (){
+				console.log("soy Init y digo :" + this.hola);
+			}
+
+			function B(){
+				this.hola = "soy B";
+			};
+			var main = new A();
+			var funcion = main.init.bind(B());
+			funcion();
+			//document.addEventListener('load', d.init.bind(B), true);
+		</script>
+	</body>
+</html>

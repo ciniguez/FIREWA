@@ -32,28 +32,20 @@ Finally, users place graphs on wirecloud dashboard.
 
 SETTINGS
 Url conecion: "ws://host:port/project_name/websocket_name"
-Example: "ws://localhost:8080/WebSockets/websocket/chat"
+Example: "ws://localhost:8080/WebSockets/websocket/chat" o "ws://158.42.185.198:8080/graphws"
 
 INPUT DATA AND OUTPUT DATA
 DISCRETE BAR CHART IN:
 [
 	{
-		"chromosomeId":1,
+		"id":1,
 		"name":"Chromosome 1",
-		"referenceId":"Reference 1",
-		"curatedVariations":null,
-		"calledVariations":null,
-		"sizeCuratedVariations":0,
-		"sizeCalledVariations":12
+		"size":12
 	},
 	{
-		"chromosomeId":2,
-		"name":"Chromosome 2",
-		"referenceId":"Reference 2",
-		"curatedVariations":null,
-		"calledVariations":null,
-		"sizeCuratedVariations":0,
-		"sizeCalledVariations":24
+		"id":1,
+		"name":"Chromosome 1",
+		"size":12
 	}
 ]
 DISCRETE BAR CHART OUT:

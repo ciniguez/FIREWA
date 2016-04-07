@@ -19,18 +19,19 @@ var MODELO = {
 				that.conn.send(idWebSocket);
 			};
 			that.conn.onerror = function(error) {
-				console.log("webSocket Error " + error);
+				console.log(idWebSocket + "-webSocket Error: " + error);
 			};
 			//Acciones a realizar cuando se recibe un mensaje
 			that.conn.onmessage = function(e) {
 				try {
-					var json = e.data;
+					var json = JSON.parse(e.data);
 					if ( nameFunctionCallback instanceof Function && nameFunctionCallbackError instanceof Function) {
-						if ( json instanceof Array) {
+						if ( json instanceof Object) {
 							//Se envia los datos a la funcion respectiva (callback)
 							nameFunctionCallback(json);
+							 
 						}else{
-							nameFunctionCallbackError("Los datos provistos no son Arrays =>" + json);
+							nameFunctionCallbackError("El dato enviado por servidor no es un Objeto =>" + json);
 							//Se envia los datos a la funcion respectiva (callback) con null
 							nameFunctionCallback(null);
 						}
@@ -38,13 +39,13 @@ var MODELO = {
 						nameFunctionCallbackError("fn No es una funcion válida");
 					}
 				} catch(error) {
-					nameFunctionCallbackError(error);
+					nameFunctionCallbackError("onMessage:"+error);
 				}
 
 			};
 			//Cuando se cierra la conexión se llama a onclose donde e es el motivo del cierre.
 			that.conn.onclose = function(e) {
-				console.log("webSocket Closed " + e.data);
+				console.log("(webSocket Closed) Code:" + e.code +" Reason:" +e.reason);
 			};
 
 		} else {

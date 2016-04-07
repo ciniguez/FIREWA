@@ -1,6 +1,6 @@
 .chart {
 	min-height: 150px;
-	border: 2px solid #999999;
+	/*border: 2px solid #888888;*/
 	margin: 5px;
 }
 /**************************
@@ -18,7 +18,7 @@
 }
 
 #msg p{
-	font-size: 1em;
+	font-size: 0.7em;
 	color: red;
 	line-height: 1.2;
 }

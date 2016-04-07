@@ -16,18 +16,21 @@
 	<contents src="index.html" useplatformstyle="true"/>
 	<rendering width="5" height="10"/>
 	<preferences>
-		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="" />
-		<preference name="websocketIdentifier" type="text" label="WebSocket Identifier" description="Identifier name of websocket (unique)" default="" />
-		<preference name="typeGraph" type="list" label="Type :" description="Graph Type" default="pieChart">
+		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="ws://158.42.185.198:8080/graphws2" />
+		<preference name="flagWorkspace" type="list" label="Worksapace :" description="Environment upon which it works" default="local">
+			<option label="Local-Simple HTML" value="local"/>
+			<option label="Wirecloud" value="wirecloud"/>
+		</preference>
+		<preference name="typeGraph" type="list" label="Type :" description="Graph Type" default="discreteBarChart">
 			<option label="Line" value="lineChart"/>
 			<option label="DiscreteBar" value="discreteBarChart"/>
 			<option label="Pie" value="pieChart"/>
 			<option label="Donut" value="donutChart"/>
 		</preference>
-		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chr">
-			<option label="Chromosome" value="chr"/>
-			<option label="Variantes" value="idVariant_Called"/>
-			<option label="Position" value="pos"/>
+		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chromosome">
+			<option label="Chromosome" value="chromosome"/>
+			<option label="Variantes" value="Variant"/>
+			<option label="Position" value="posotion"/>
 			<option label="IdSNP" value="idSNP"/>
 			<option label="ReferenceAllele" value="referenceAllele"/>
 			<option label="AltAlleles" value="altAlleles"/>
@@ -35,22 +38,16 @@
 			<option label="Filter" value="filter"/>
 			<option label="Format" value="format"/>
 		</preference>
-		<preference name="attr2" type="list" label="Attribute 2 :" description="Y Axis" default="idVariant_Called">
-			<option label="Chromosome" value="chr"/>
-			<option label="Variantes" value="idVariant_Called"/>
-			<option label="Position" value="pos"/>
+		<preference name="attr2" type="list" label="Attribute 2 :" description="Y Axis" default="Variants">
+			<option label="Chromosome" value="chromosome"/>
+			<option label="Variantes" value="Variant"/>
+			<option label="Position" value="posotion"/>
 			<option label="IdSNP" value="idSNP"/>
 			<option label="ReferenceAllele" value="referenceAllele"/>
 			<option label="AltAlleles" value="altAlleles"/>
 			<option label="Quality" value="quality"/>
 			<option label="Filter" value="filter"/>
 			<option label="Format" value="format"/>
-		</preference>
-		<preference name="aggregate" type="list" label="Aggregate Function :" description="Aggregaate Function for attribute 2" default="COUNT">
-			<option label="Sum" value="SUM"/>
-			<option label="Count" value="COUNT"/>
-			<option label="Distinct" value="DISTINCT"/>
-			<option label="Default" value="ALL"/>
 		</preference>
 		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
 			<option label="Development" value="dev"/>
@@ -58,10 +55,6 @@
 		</preference>
 	</preferences>
 	<wiring>
-		<outputendpoint name="outputCromosome" type="text" label="Chromosome selected output" description="The Chromosome number selected" friendcode="codigo"/>
-		<inputendpoint name="inputChromosome" type="text" label="Chromosome selected input" description="Receive chromosome number sent by other widgets" friendcode="codigo" />
-		<inputendpoint name="inputFilter" type="text" label="Filter selected input" description="Receive Filter number sent by other widgets" friendcode="codigo" />
-		<inputendpoint name="inputAllele" type="text" label="Allele selected input" description="Receive Allele number sent by other widgets" friendcode="codigo" />
-		<inputendpoint name="inputPos" type="text" label="Position selected input" description="Receive Position sent by other widgets" friendcode="codigo" />
+		<outputendpoint name="outputVar" type="text" label="Out Selected" description="The Variable selected" friendcode="codigo"/>
 	</wiring>
 </widget>

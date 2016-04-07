@@ -2,9 +2,9 @@
 /*global MashupPlatform StyledElements Vcard NGSI*/
 
 /**
- * Controlador de Widget Lista
- * OBJETIVO: Presentar una lista de items provenientes de la consulta por WebSockets a un servidor indicado.
- * La selección de uno o varios items produce el envío de la información hacia Servidor a través del WebSocket previamente conectado.
+ * Controlador de Widget Filters
+ * OBJETIVO: Presentar una lista de filtros provenientes de los items pulsados externamente y recibidos por input del Wirin
+ * Adicionalmente, permite eliminar los filtros de la lista, provocando el envío de la información a traves de WebSockets a un servidor indicado.
  *
  */
 (function() {
@@ -15,8 +15,6 @@
 	"use strict";
 	// url de servicio web consultada
 	var url = "";
-	// atributo 1 para el grafico
-	var attr1 = "chr";
 	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
 	var environment = "dev";
 	// cadena para almacenar el parametro cambiado
@@ -24,9 +22,11 @@
 	// Bandera que identifica si el ambiente de ejecucion (local o wirecloud)
 	var boolPresentacionWirecloud = false;
 	//variable para el WebSocket
-	var ws;
+	var ws = null;
 	//Bandera para especificar bajo que ambiente se trabaja
 	var flagWorkspace = null;
+	//Nombre identificador del websocket para conexion al servidor
+	var identificadorWebSocket = null;
 
 	/**
 	 * Inicialización de variables
@@ -35,20 +35,22 @@
 		//Obtener los atributos desde preferencias
 		if (boolPresentacionWirecloud) {
 			url = obtenerAtributoPreferencias('urlServicio');
-			attr1 = obtenerAtributoPreferencias('attr1');
 			environment = obtenerAtributoPreferencias('environment');
+			identificadorWebSocket = obtenerAtributoPreferencias('websocketIdentifier');
+			flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
 		} else {
 			url = obtenerAtributoPreferencias('undefined');
-			attr1 = obtenerAtributoPreferencias('undefined');
 			environment = obtenerAtributoPreferencias('undefined');
+			identificadorWebSocket = obtenerAtributoPreferencias('undentified');
 
 			//url = "ws://localhost:8080/WebSockets/websocket/chat";
 			url = "ws://158.42.185.198:8080/graphws2";
 			environment = "dev";
+			identificadorWebSocket = "reset";
+			//Crear WebSocket
+			crearWebSocket();
+			logg("init", "iniciando en Local", 173);
 		}
-
-		//Inicio el WebSocket con la funcion callback, encargada de llenar los datos en pantalla.
-		ws = new MODELO.websocket(url, presentar_datos, noData, "sampleVsVariant");
 
 		//----------------------------------------------------------------------------------
 		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
@@ -66,10 +68,6 @@
 					url = obtenerAtributoPreferencias('urlServicio');
 					parametroCambiado = "url";
 				}
-				if ('attr1' in new_values) {
-					attr1 = obtenerAtributoPreferencias('attr1');
-					parametroCambiado = "attr1";
-				}
 				if ('environment' in new_values) {
 					parametroCambiado = "env";
 					environment = obtenerAtributoPreferencias('environment');
@@ -81,9 +79,8 @@
 						boolPresentacionWirecloud = true;
 
 						url = obtenerAtributoPreferencias('urlServicio');
-						attr1 = obtenerAtributoPreferencias('attr1');
 						environment = obtenerAtributoPreferencias('environment');
-
+						crearWebSocket();
 					}
 					logg("init", "Configuracion:" + flagWorkspace, 173);
 				}
@@ -95,6 +92,71 @@
 			});
 		}
 
+		if (boolPresentacionWirecloud) {
+			//REGISTRO DE WIRING
+			/* Add register to wiring the Cromosome input value*/
+			MashupPlatform.wiring.registerCallback("inputChr", handlerSlot);
+			/* Add register to wiring the Phenotype input value*/
+			MashupPlatform.wiring.registerCallback("inputPheno", handlerSlot);
+			/* Add register to wiring the Clinical Significance input value*/
+			MashupPlatform.wiring.registerCallback("inputClinical", handlerSlot);
+		}
+	}
+
+	/**
+	 * Obtener datos enviados al Widget
+	 * @param {Object} itemString
+	 * @author Carlos iniguez
+	 */
+	var handlerSlot = function handlerSlot(itemString) {
+		var valorRecibido = null;
+		switch(itemString) {
+		case "inChr":
+			valorRecibido = itemString;
+			break;
+		case "inPheno":
+			valorRecibido = itemString;
+			break;
+		case "inClinical":
+			valorRecibido = itemString;
+			break;
+		}
+		if (itemString !== "" || itemString !== null) {
+			presentar_datos(itemString, valorRecibido);
+		} else {
+			logg("handlerSlot", "No existe emparejamiento con la preferencia solicitada", 357);
+		}
+	};
+	function presentar_datos(wiringNameVariableRecibed, valueRecibed) {
+		logg("init", "ingresa a function de presentacion de datos con datos", 90);
+		var label = "";
+		var id = "all";
+
+		switch(wiringNameVariableRecibed) {
+		case "inChr":
+			label = "Chromosome ";
+			id = "chromosome";
+			break;
+		case "inPheno":
+			label = "Phenotype ";
+			id = "phenotype";
+			break;
+		case "inClinical":
+			label = "Cln. Significance ";
+			id = "clinicalSignificance";
+			break;
+		}
+		$("#filterList").append('<li><div id="' + id + '" class="fondoGradado filtro"><div class="item">' + label + '</div><div class="item"><span class="valorFiltro">' + valueRecibed + '</span></div><div class="item"><div class="btnRemove"></div></div></div></li>');
+		$("#" + id + " .btnRemove").on("click", function() {
+			$("#" + id).fadeOut("3000", function() {
+				var datoEnvio = $(this).attr('id');
+				logg("Envio Datos", JSON.stringify(datoEnvio), 150);
+				ws.send(JSON.stringify(datoEnvio));
+				$(this).parent().remove();
+
+			});
+
+		});
 	}
 
 	/**
@@ -102,78 +164,19 @@
 	 */
 	function noData(msg) {
 		logg("noData", msg, 87);
-		//$("#msg").empty();
-		//$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
-		//$("#msg").fadeOut(5000);
 
-		$('#selectable').empty();
-		$("#selectable").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
+		//$('#selectable').empty();
+		//$("#selectable").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
 	}
 
 	/**
-	 * Present UI on screen
-	 * @param data Datos para llenar en pantalla. La estructura de la
-	 * data debe ser igual a la indicada en la documentación de requerimientos.
+	 * Esta funcion es llamada cuando no se encontró datos en el servidor.
 	 */
-	function presentar_datos(data) {
-		//logg("presentar_datos", data, 173);
-		data = transformarDatos(data);
-		//Borro todo item de lista. Dejar limpia la lista
-		$('#selectable').empty();
-		//Por cada item en los datos se agrega un item de lista
-		for (var i = 0; i < data.length; i++) {
-			//logg("presentar_datos", "datos enviados: " + data[i], 107);
-			$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].name + ' -- ' + data[i].size + '</li>');
-		}
+	function recepcionServer(msg) {
+		logg("noData", msg, 87);
 
-		//Comportamiento al hacer click en uno o varios de los items.
-		var arrayItemsSeleccionados = [];
-		$("#selectable").selectable({
-			stop : function() {
-				arrayItemsSeleccionados.length = 0;
-				$(".ui-selected", this).each(function() {
-					var index = $("#selectable li").index(this);
-					arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
-				});
-				logg("presentar_datos", "datos enviados: " + JSON.stringify(arrayItemsSeleccionados), 107);
-				//Envío de datos al Servidor mediante WebSocket y por Wiring
-				//logg("presentar_datos", "datos enviados: " + JSON.stringify(arrayItemsSeleccionados), 107);
-				ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
-				if (boolPresentacionWirecloud) {
-					MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
-				}
-
-			}
-		});
-
-	}
-
-	/**
-	 * Transforma los datos recibidos por el servidor a datos que entiende el gráfico de Barras.
-	 * @param {Object} datos Datos del servidor.
-	 */
-	function transformarDatos(json) {
-		if (json === null || json === 'undefined') {
-			json = [{
-				"id" : 1,
-				"name" : "Chromosome 1",
-				"size" : 12
-			}, {
-				"id" : 2,
-				"name" : "Chromosome 2",
-				"size" : 24
-			}];
-
-		}
-		return json;
-	}
-
-	/**
-	 * Llama a OntenerDatos(). Funciona como un punto de encuentro común y seteo de variable.
-	 */
-	function dispararCambio(cadena) {
-		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
-		MODELO.websocket.conn.send(cadena);
+		//$('#selectable').empty();
+		//$("#selectable").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
 	}
 
 	/**
@@ -190,6 +193,21 @@
 		}
 		return atributo;
 	};
+	/**
+	 * Establece la conexión con el servidord a traves de WebSocket
+	 * @author Carlos iniguez
+	 */
+	function crearWebSocket() {
+		logg("crearWebSocket", "Conectando a WebSocket con: " + url, 432);
+		//Para la conexion con WebSocket se requiere el nombre identificador del widget para enviarlo al servidor.
+		if (identificadorWebSocket !== null && url !== null && ws == null) {
+			ws = new MODELO.websocket(url, recepcionServer, noData, identificadorWebSocket);
+		} else {
+			logg("init", "Se requiere configurar el identificador de Websocket o su URL", 103);
+			noData("You must set the websocket url or identifier!");
+		}
+	}
+
 	/**
 	 * Function utilizada para los mensajes de DEBUG ( tipo INFORMACION), en el caso de que se ejecute el Widget en modo "development"
 	 * @param nombreFuncion Nombre de la funcion de donde se lanza el mensaje
