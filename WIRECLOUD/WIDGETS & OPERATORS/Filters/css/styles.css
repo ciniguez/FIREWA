@@ -1,36 +1,10 @@
-body,html {
+body, html {
 	margin: 0;
 }
-#selectable .ui-selecting {
-	background: #FECA40;
-}
-#selectable .ui-selected {
-	background: #F39814;
-	color: white;
-}
-#selectable {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-	width: 100%;
-}
-.contendor{
-	border:3px solid rgb(22,41,85);
-}
-#selectable li {
-	margin: 1px;
-	padding: 0.4em;
-	font-size: 1.3em;
-	height: 18px;
-	font-family: sans-serif;
-	border:1px solid rgb(232,232,232);
-}
-
 #title {
 	height: 30px;
 	text-align: center;
 	background: rgb(22,41,85);
-	
 	background: -webkit-linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
 	background: -o-linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
 	background: -moz-linear-gradient(rgb(6,21,57),rgb(22,41,85),rgb(6,21,57));
@@ -39,36 +13,48 @@ body,html {
 	font-family: sans-serif;
 	line-height: 30px;
 }
-#msg p{
-	font-size: 1em;
-	color: red;
+.contendor {
+	border: 1px solid rgb(22,41,85);
 }
-.btnRemove {
-	background-image: url('../images/remove_11.png');
-	background-repeat: no-repeat;
-	width: 21px;
-	height: 21px;
-}
-.fondoGradado {
-	background-image: url('../images/fnd.png');
-	background-repeat: repeat-x;
-}
-.filtro {
-	border: 1px solid #666666;
-	padding: 5px;
-	margin-left: 5px;
-	display: block;
-	height: 45px;
-}
-.item {
-	float: left;
-	margin-left:4px;
-	color: #ffffff;
-	font-family: Verdana;
-	font-size: 14px;
-}
-ul {
+#list {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
+	width: 100%;
+	font-size: 0.7em;
+}
+#list li {
+	margin: 1px;
+	padding: 0.4em;
+	font-size: 1.3em;
+	height: 18px;
+	font-family: sans-serif;
+	border: 1px solid rgb(232,232,232);
+}
+.selectedLi {
+	background-color: #FECA40;
+}
+.onDeleteLi {
+	background-color: #FE0022;
+}
+#list .label {
+	float: left;
+	height: 100%;
+}
+#list .control {
+	float: right;
+	margin-right: 4px;
+	font-size: 0.8em;
+	line-height: 20px;
+}
+#no-data{
+	text-align: center;
+}
+#no-data #contenido{
+	margin: 15px 0 15px 0;
+	display: inline-block;
+	width:128px;
+	height:128px;
+	background-image: url('../images/technology.png');
+	background-repeat: repeat-x;
 }

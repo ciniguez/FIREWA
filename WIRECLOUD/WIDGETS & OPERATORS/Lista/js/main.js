@@ -1,6 +1,17 @@
 /*jshint browser:true*/
 /*global MashupPlatform StyledElements Vcard NGSI*/
 
+//Si se cierra el Navegador, cerrar el WebSocket activo.
+window.onbeforeunload = function() {
+	if (MODELO.websocket.singleInstance) {
+		console.log(MODELO.websocket.singleInstance.conn.readyState);
+		if (MODELO.websocket.singleInstance.conn.readyState != WebSocket.CLOSED) {
+			MODELO.websocket.singleInstance.conn.close(1000);
+			console.log("ws cerrado");
+		}
+	}
+};
+
 /**
  * Controlador de Widget Lista
  * OBJETIVO: Presentar una lista de items provenientes de la consulta por WebSockets a un servidor indicado.
@@ -14,86 +25,118 @@
 	 */
 	"use strict";
 	// url de servicio web consultada
-	var url = "";
+	var url = null;
 	// atributo 1 para el grafico
-	var attr1 = "chr";
+	var attr1 = null;
 	// Variable para saber si el widget se ejecuta en Producción o en Desarrollo.
 	var environment = "dev";
 	// cadena para almacenar el parametro cambiado
 	var parametroCambiado = null;
 	// Bandera que identifica si el ambiente de ejecucion (local o wirecloud)
-	var boolPresentacionWirecloud = false;
+	var boolPresentacionWirecloud = true;
 	//variable para el WebSocket
-	var ws;
+	var ws = null;
 	//Bandera para especificar bajo que ambiente se trabaja
 	var flagWorkspace = null;
+	//Nombre identificador del websocket para conexion al servidor
+	var identificadorWebSocket = null;
 
 	/**
 	 * Inicialización de variables
 	 */
 	function init() {
-		//Obtener los atributos desde preferencias
-		if (boolPresentacionWirecloud) {
-			url = obtenerAtributoPreferencias('urlServicio');
-			attr1 = obtenerAtributoPreferencias('attr1');
-			environment = obtenerAtributoPreferencias('environment');
-		} else {
-			url = obtenerAtributoPreferencias('undefined');
-			attr1 = obtenerAtributoPreferencias('undefined');
-			environment = obtenerAtributoPreferencias('undefined');
 
-			//url = "ws://localhost:8080/WebSockets/websocket/chat";
-			url = "ws://158.42.185.198:8080/graphws2";
-			environment = "dev";
-		}
+		//Ocultar mensaje de desconexion
+		$("#no-data").hide();
 
-		//Inicio el WebSocket con la funcion callback, encargada de llenar los datos en pantalla.
-		ws = new MODELO.websocket(url, presentar_datos, noData, "sampleVsVariant");
+		//TODO: Descomentar para trabajar en LOCAL----
+		//url = "ws://158.42.185.198:8080/graphws2";
+		// -------------------------------------------
 
-		//----------------------------------------------------------------------------------
-		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
-		//----------------------------------------------------------------------------------
+		//TODO: Descomentar para trabajar en WIRECLOUD -------------
+		url = obtenerAtributoPreferencias('urlServicio');
+
 		/*
-		 * Registro lo que ingresa como Preferencia
-		 * Si existe un cambio en un parámetro de preferencias, el método se dispara
+		 * Registro los datos desde Preferencias (fichero config.xml)
+		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
 		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
+		 * @author Carlos iniguez
 		 */
-		if (boolPresentacionWirecloud) {
-			MashupPlatform.prefs.registerCallback(function(new_values) {
-				parametroCambiado = "";
-				var boolean_flag = false;
-				if ('urlServicio' in new_values) {
-					url = obtenerAtributoPreferencias('urlServicio');
-					parametroCambiado = "url";
-				}
-				if ('attr1' in new_values) {
-					attr1 = obtenerAtributoPreferencias('attr1');
-					parametroCambiado = "attr1";
-				}
-				if ('environment' in new_values) {
-					parametroCambiado = "env";
-					environment = obtenerAtributoPreferencias('environment');
-				}
-				if ('flagWorkspace' in new_values) {
-					parametroCambiado = "flagWorkspace";
-					flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
-					if (flagWorkspace === "wirecloud") {
-						boolPresentacionWirecloud = true;
 
-						url = obtenerAtributoPreferencias('urlServicio');
-						attr1 = obtenerAtributoPreferencias('attr1');
-						environment = obtenerAtributoPreferencias('environment');
-
-					}
-					logg("init", "Configuracion:" + flagWorkspace, 173);
+		MashupPlatform.prefs.registerCallback(function(new_values) {
+			parametroCambiado = "";
+			var boolean_flag = false;
+			if ('urlServicio' in new_values) {
+				url = obtenerAtributoPreferencias('urlServicio');
+				parametroCambiado = "url";
+			}
+			if ('attr1' in new_values) {
+				attr1 = obtenerAtributoPreferencias('attr1');
+				parametroCambiado = "attr1";
+			}
+			if ('environment' in new_values) {
+				parametroCambiado = "env";
+				environment = obtenerAtributoPreferencias('environment');
+			}
+			if ('flagWorkspace' in new_values) {
+				parametroCambiado = "flagWorkspace";
+				flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
+				if (flagWorkspace !== "wirecloud") {
+					boolPresentacionWirecloud = false;
 				}
+			}
 
-				//llamo a que se ejecute la obtención de datos desde el servidor
-				logg("init", "parametro cambiado: " + parametroCambiado, 111);
-				dispararCambio(parametroCambiado);
+			//llamo a que se ejecute la obtención de datos desde el servidor
+			logg("init", "parametro cambiado: " + parametroCambiado, 111);
+			dispararCambio(parametroCambiado);
 
-			});
+		});
+
+		//_---------------------------------------
+		if (url !== null) {
+			//Tomamos los valores desde preferencias config.xml
+			flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
+			if (flagWorkspace === "wirecloud") {
+				boolPresentacionWirecloud = true;
+				settingToWirecloud();
+			} else {
+				settingToLocal();
+			}
+		} else {
+			logg("init", "Se requiere URL para iniciar. Configure y Reinicie el Widget!!.", 82);
 		}
+	}
+
+	function getIdentificadorWebSocket() {
+		var identificador = null;
+		if (attr1 !== null) {
+			identificador = attr1 + "VsVariant";
+		}
+		logg("getIdentificadorWebSocket", identificador, 180);
+		return identificador;
+	}
+
+	function settingToLocal() {
+		//Ocultar mensaje de desconexion
+		$("#no-data").show();
+		//TODO: Aqui poner algo en pantalla indicando que se requiere configurar y quitar todo lo que esta aqui abacjo
+		logg("init", "Configurando como local.", 94);
+		//local settings only by testing
+		environment = "dev";
+		attr1 = "sample";
+		identificadorWebSocket = getIdentificadorWebSocket();
+	}
+
+	function settingToWirecloud() {
+		//Ocultar mensaje de desconexion
+		$("#no-data").hide();
+
+		logg("init", "Configurando como Wirecloud.", 105);
+		url = obtenerAtributoPreferencias('urlServicio');
+		attr1 = obtenerAtributoPreferencias('attr1');
+		environment = obtenerAtributoPreferencias('environment');
+
+		crearWebSocket();
 
 	}
 
@@ -102,12 +145,8 @@
 	 */
 	function noData(msg) {
 		logg("noData", msg, 87);
-		//$("#msg").empty();
-		//$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
-		//$("#msg").fadeOut(5000);
-
-		$('#selectable').empty();
-		$("#selectable").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
+		$('#list').empty();
+		$("#list").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
 	}
 
 	/**
@@ -115,52 +154,75 @@
 	 * @param data Datos para llenar en pantalla. La estructura de la
 	 * data debe ser igual a la indicada en la documentación de requerimientos.
 	 */
-	function presentar_datos(data) {
+	function presentarDatos(data) {
 		//logg("presentar_datos", data, 173);
 		data = transformarDatos(data);
 		//Borro todo item de lista. Dejar limpia la lista
-		$('#selectable').empty();
+		$('#list').empty();
 		//Por cada item en los datos se agrega un item de lista
 		for (var i = 0; i < data.length; i++) {
 			//logg("presentar_datos", "datos enviados: " + data[i], 107);
-			$("#selectable").append('<li id="item_' + data[i].id + '" class="ui-widget-content">' + data[i].name + ' -- ' + data[i].size + '</li>');
+			$("#list").append('<li>' + '<div id="item_' + data[i].id + '" data-id="' + data[i].id + '">' + '<div class="label">' + data[i].name + ' -- ' + data[i].size + '</div>' + '<div class="control">' + '<input class="chk" type="checkbox" value="' + data[i].id + '">' + '</div></div>' + '</li>');
 		}
 
-		//Comportamiento al hacer click en uno o varios de los items.
-		var arrayItemsSeleccionados = [];
-		$("#selectable").selectable({
-			stop : function() {
-				arrayItemsSeleccionados.length = 0;
-				$(".ui-selected", this).each(function() {
-					var index = $("#selectable li").index(this);
-					arrayItemsSeleccionados.push($(this).attr("id").split("_")[1]);
-				});
-				logg("presentar_datos", "datos enviados: " + JSON.stringify(arrayItemsSeleccionados), 107);
-				//Envío de datos al Servidor mediante WebSocket y por Wiring
-				//logg("presentar_datos", "datos enviados: " + JSON.stringify(arrayItemsSeleccionados), 107);
+		$('.chk').on("change", function() {
+			var arrayItemsSeleccionados = [];
+			arrayItemsSeleccionados.length = 0;
+			if ($(this).is(":checked")) {
+				$(this).parent().parent().parent().addClass("selectedLi");
+				arrayItemsSeleccionados.push($(this).attr("value"));
+				
+				logg("presentar_datos", "Data Enviada:" +JSON.stringify(arrayItemsSeleccionados) , 176);
 				ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
+				
 				if (boolPresentacionWirecloud) {
+					logg("presentar_datos", "Envio via Wiring:" +JSON.stringify(arrayItemsSeleccionados) , 179);
 					MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
 				}
-
+				
+			} else {
+				console.log(" uncheck: " + $(this).attr("value"));
+				$(this).parent().parent().parent().removeClass("selectedLi");
+				//arrayItemsSeleccionados.push($(this).attr("value"));
 			}
 		});
-
 	}
 
 	/**
-	 * Transforma los datos recibidos por el servidor a datos que entiende el gráfico de Barras.
+	 * Establece la conexión con el servidord a traves de WebSocket
+	 * @author Carlos iniguez
+	 */
+	function crearWebSocket() {
+
+		//Para la conexion con WebSocket se requiere el nombre identificador del widget para enviarlo al servidor.
+		if (getIdentificadorWebSocket() !== null && url !== null) {
+			if (ws !== null) {
+				ws.conn.close();
+				ws = null;
+				logg("crearWebSocket", "There already is a connection alive!. I will close it and start a newer", 466);
+			}else{
+				logg("crearWebSocket", "Conectando a WebSocket con: " + url, 423);
+				ws = new MODELO.websocket(url, presentarDatos, noData, identificadorWebSocket);	
+			}
+		} else {
+			logg("crearWebSocket", "You must set the websocket url or identifier!", 466);
+			presentarDatos(null);
+		}
+	}
+
+	/**
+	 * Transforma los datos recibidos por el servidor a formato de datos solicitados por el widge.
 	 * @param {Object} datos Datos del servidor.
 	 */
 	function transformarDatos(json) {
 		if (json === null || json === 'undefined') {
 			json = [{
 				"id" : 1,
-				"name" : "Chromosome 1",
+				"name" : "No data",
 				"size" : 12
 			}, {
 				"id" : 2,
-				"name" : "Chromosome 2",
+				"name" : "No data",
 				"size" : 24
 			}];
 
@@ -169,24 +231,38 @@
 	}
 
 	/**
-	 * Llama a OntenerDatos(). Funciona como un punto de encuentro común y seteo de variable.
+	 * Llamada al Websocket por demanda.
+	 * @author Carlos iniguez
 	 */
 	function dispararCambio(cadena) {
-		logg("dispararCambio", "Obteniendo datos concadena :" + cadena, 179);
-		MODELO.websocket.conn.send(cadena);
+		if (cadena === "flagWorkspace") {
+			if (flagWorkspace !== "wirecloud") {
+				settingToLocal();
+			} else {
+				settingToWirecloud();
+			}
+		}
+		if (cadena === "attr1") {
+			identificadorWebSocket = getIdentificadorWebSocket();
+			if (ws) {
+				//reconexion enviando nuevo nombre
+				ws.conn.send(identificadorWebSocket);
+			} else {
+				crearWebSocket();
+			}
+		}
+
 	}
 
 	/**
 	 * Otiene el valor del atributo desde preferencias, basado en el nombre del atributo enviado como parámetro.
 	 * @atributo Valor del atributo configurado en Preferencias. Si no encuentra el valor, retorna NULL.
+	 * @author Carlos iniguez
 	 */
 	function obtenerAtributoPreferencias(nombreAtributo) {
-		var atributo;
+		var atributo = null;
 		if (boolPresentacionWirecloud) {
 			atributo = MashupPlatform.prefs.get(nombreAtributo);
-		}
-		if ( typeof (atributo) === 'undefined') {
-			atributo = null;
 		}
 		return atributo;
 	};

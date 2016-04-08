@@ -7,26 +7,22 @@
 		<contributors>Carlos Iniguez</contributors>
 		<email>carlos.iniguez79@gmail.com</email>
 		<image>images/graphnvd3.png</image><!-- 170x80 -->
-		<description>Lista de Datos</description>
+		<description>Lista Items seleccionables como filtros.</description>
 		<longdescription>README.md</longdescription>
 		<license>Apache License 2.0</license>
 		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
 		<doc>docs/requirements.txt</doc>
 	</details>
 	<contents src="index.html" useplatformstyle="true"/>
-	<rendering width="5" height="15"/>
+	<rendering width="4" height="22"/>
 	<preferences>
-		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="" />
-		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chr">
-			<option label="Chromosome" value="chr"/>
-			<option label="Variantes" value="idVariant_Called"/>
-			<option label="Position" value="pos"/>
-			<option label="IdSNP" value="idSNP"/>
-			<option label="ReferenceAllele" value="referenceAllele"/>
-			<option label="AltAlleles" value="altAlleles"/>
-			<option label="Quality" value="quality"/>
-			<option label="Filter" value="filter"/>
-			<option label="Format" value="format"/>
+		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="ws://158.42.185.198:8080/graphws2" />
+		<preference name="attr1" type="list" label="List by:" description="Item list" default="samples">
+			<option label="Samples" value="sample"/>
+		</preference>
+		<preference name="flagWorkspace" type="list" label="Worksapace :" description="Environment upon which it works" default="local">
+			<option label="Local-Simple HTML" value="local"/>
+			<option label="Wirecloud" value="wirecloud"/>
 		</preference>
 		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
 			<option label="Development" value="dev"/>

@@ -7,21 +7,21 @@
 		<contributors>Carlos Iniguez</contributors>
 		<email>carlos.iniguez79@gmail.com</email>
 		<image>images/graphnvd3.png</image><!-- 170x80 -->
-		<description>Lista de Datos</description>
+		<description>Lista los filtros registrados por otros gráficos estadísticos enlazados.</description>
 		<longdescription>README.md</longdescription>
 		<license>Apache License 2.0</license>
 		<licenseurl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseurl>
 		<doc>docs/requirements.txt</doc>
 	</details>
 	<contents src="index.html" useplatformstyle="true"/>
-	<rendering width="5" height="15"/>
+	<rendering width="4" height="22"/>
 	<preferences>
-		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="" />
+		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="ws://158.42.185.198:8080/graphws2" />
 		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
 			<option label="Development" value="dev"/>
 			<option label="Production" value="prod"/>
 		</preference>
-		<preference name="websocketIdentifier" type="text" label="WebSocket Identifier" description="Identifier name of websocket (unique)" default="" />
+		<preference name="websocketIdentifier" type="text" label="WebSocket Identifier" description="Identifier name of websocket (unique)" default="reset" />
 		<preference name="flagWorkspace" type="list" label="Worksapace :" description="Environment upon which it works" default="local">
 			<option label="Local-Simple HTML" value="local"/>
 			<option label="Wirecloud" value="wirecloud"/>
@@ -29,7 +29,8 @@
 	</preferences>
 	<wiring>
 		<outputendpoint name="outputItem" type="text" label="Variable selected output" description="The Variable number selected" friendcode="codigo"/>
-		<inputendpoint name="intChr" type="text" label="in Chromosome" description="The Variable number selected" friendcode="chr"/>
+		<inputendpoint name="inSam" type="text" label="in Sample" description="The Variable number selected" friendcode="sample"/>
+		<inputendpoint name="inChr" type="text" label="in Chromosome" description="The Variable number selected" friendcode="chr"/>
 		<inputendpoint name="inPheno" type="text" label="in Phenotype" description="The Variable number selected" friendcode="pheno"/>
 		<inputendpoint name="inClinical" type="text" label="in Clinical" description="The Variable number selected" friendcode="clin"/>
 	</wiring>

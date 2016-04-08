@@ -29,25 +29,11 @@
 		</preference>
 		<preference name="attr1" type="list" label="Attribute 1 :" description="X Axis" default="chromosome">
 			<option label="Chromosome" value="chromosome"/>
-			<option label="Variantes" value="Variant"/>
-			<option label="Position" value="posotion"/>
-			<option label="IdSNP" value="idSNP"/>
-			<option label="ReferenceAllele" value="referenceAllele"/>
-			<option label="AltAlleles" value="altAlleles"/>
-			<option label="Quality" value="quality"/>
-			<option label="Filter" value="filter"/>
-			<option label="Format" value="format"/>
+			<option label="Phenotype" value="phenotype"/>
+			<option label="Clinical Significance" value="clinicalSignificance"/>
 		</preference>
-		<preference name="attr2" type="list" label="Attribute 2 :" description="Y Axis" default="Variants">
-			<option label="Chromosome" value="chromosome"/>
+		<preference name="attr2" type="list" label="Attribute 2 :" description="Y Axis" default="Variant">
 			<option label="Variantes" value="Variant"/>
-			<option label="Position" value="posotion"/>
-			<option label="IdSNP" value="idSNP"/>
-			<option label="ReferenceAllele" value="referenceAllele"/>
-			<option label="AltAlleles" value="altAlleles"/>
-			<option label="Quality" value="quality"/>
-			<option label="Filter" value="filter"/>
-			<option label="Format" value="format"/>
 		</preference>
 		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
 			<option label="Development" value="dev"/>

@@ -1,14 +1,13 @@
 Tipo documento: Requisitos.
-Widget: IssuesInbox.
-Autor: sblanco
+Widget: Filter List.
+Autor: ciniguez
 
 
 Requisitos generales:
-    A. Al iniciar el widget se debe mostrar un mensaje para alertar al usuario de que debe comunicarse por wiring.
-    B. El widget debe poder recibir por WebSocket la lista de datos que serán listadas en pantalla a manera de columna.
-    C. Cada item de la lista desplegará en nombre del item
-    D. Se podrá seleccionar uno o varios items secuencciales.
-    E. Al seleccionar un item de la lista, se debe enviar como salida la lista de items seleccionados, la entrega de datos debe ser realizada mediante WebSocket.
+    A. Al iniciar el widget se debe mostrar un mensaje para alertar al usuario de que debe comunicarse por wiring o proveer los datos para conexión con servidor de WebSockets.
+    B. El widget debe poder recibir por wiring, los items seleccionados en los gráficos a él conectados.
+    C. Cada item de la lista desplegará en nombre del item y la opción de eliminación de item. (quitar de la lista)
+    D. Se podrá eliminar un item de la lista (uno por uno), esta acción debe ser comunicada al Servidor para actualizar la lista de filtros.
 
 Definiciones:
     - WebSocket: Comunicación duplex (cliente servidor).
@@ -18,38 +17,46 @@ Requisitos especificos:
 
 1. Visuales:
     1.1. Al iniciar el widget se debe mostrar un mensaje para alertar al usuario de que debe hacer el wiring.
+    1.1. Al iniciar el widget se debe mostrar un mensaje para alertar al usuario de que debe configurar las preferencias del widget.
+    1.1. La propiedad (preferencia) del widget en cuanto al identificador de Websocket deber ser seteada a "reset" (aplica solo para el prototipo).
     1.2. Si llega un item, se agrega el item a la lista.
 
 2. Funcionalidad:
-    2.1. Secuencial:
-        2.1.1. Crear la lista de Issues.
-        2.1.2. Crear la lista de Workers.
-        2.1.3. Crear la tabla que muestra la información.
-        2.1.4. Mostrar un mensaje de alerta.
     
     2.2. Eventos:
-        2.2.1. Llega una Issue por el wiring:
-            Se agrega la Issue a la lista de Issues y se muestra en la tabla.
-        2.2.2. Llega un Worker por el wiring.
-            Se agrega el Worker a la lista de Workers y se muestra en cada una de las listas de Workers de cada Issue.
-        2.2.3. Click sobre una Issue.
-            Se envía la información de la Issue por wiring.
-        2.2.4. Selección de un Worker en una Issue.
-            Se envía la información del Worker por wiring.
-            Se construye y se envía la ruta por wiring.
-
-
+        2.2.1. Llega una item por el wiring:
+            Se agrega la item (filtro) a la lista de filtros.
+        2.2.3. Click sobre ELIMINAR.
+            Se envía por websocket la información del item(filtro) al servidor para que actualice la lista de filtros.
 3. Comunicacion:
     3.1. Entrada:
-        3.1.1. Issue. 
-        3.1.2. Worker. 
+        3.1.1. inSam = datos provenientes de Sample. 
+        3.1.2. inChr = datos provenientes de Chromosome.
+        3.1.2. inPheno = datos provenientes de Phenotype. 
+        3.1.2. inClinical = datos provenientes de Clinical Significance. 
     3.2 Salida: 
-        3.2.1. Route.
-        3.2.2. Worker. 
+        3.2.1. outputItem = item que ha sido eliminado de la lista.
 
 4. Settings:
-    - No procede.
+    - Los siguientes son los settings que han sido probados para el prototipo:
+    "WebSocket URL" = "ws://158.42.185.198:8080/graphws2"
+	"Environment :" = "Development"
+	"WebSocket Identifier" = "reset"
+	"Worksapace :" = "Local-Simple HTML"
+	
+	Nota: Para iniciar la conección con el servidor, cambie la propiedad "Worksapace" a "Wirecloud"
 
 5. Persistencia:
     - No procede.
+6. Formato de Datos.
+
+	SETTINGS
+	- Url conecion: "ws://host:port/project_name/websocket_name" 
+	- Example: "ws://localhost:8080/WebSockets/websocket/chat" 
+	INPUT DATA FORMAT.
+	 
+		"valor_ingresado_por_wiring" 
+	OUTPUT DATA FORMAT.
+	 
+		"valor_enviado_por_wiring"
 
