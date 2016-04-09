@@ -135,6 +135,7 @@ window.onbeforeunload = function() {
 		url = obtenerAtributoPreferencias('urlServicio');
 		attr1 = obtenerAtributoPreferencias('attr1');
 		environment = obtenerAtributoPreferencias('environment');
+		identificadorWebSocket = getIdentificadorWebSocket();
 
 		crearWebSocket();
 
@@ -162,33 +163,48 @@ window.onbeforeunload = function() {
 		//Por cada item en los datos se agrega un item de lista
 		for (var i = 0; i < data.length; i++) {
 			//logg("presentar_datos", "datos enviados: " + data[i], 107);
-			$("#list").append('<li>' + '<div id="item_' + data[i].id + '" data-id="' + data[i].id + '">' + '<div class="label">' + data[i].name + ' -- ' + data[i].size + '</div>' + '<div class="control">' + '<input class="chk" type="checkbox" value="' + data[i].id + '">' + '</div></div>' + '</li>');
+			$("#list").append('<li>' + '<div id="item_' + data[i].id + '" data-id="' + data[i].id + '">' + '<div class="label">' + data[i].name + ' -- ' + data[i].size + '</div>' + '<div class="control">' + '<input class="chk" type="checkbox" checked value="' + data[i].id + '">' + '</div></div>' + '</li>');
 		}
 
 		$('.chk').on("change", function() {
-			var arrayItemsSeleccionados = [];
-			arrayItemsSeleccionados.length = 0;
+
 			if ($(this).is(":checked")) {
 				$(this).parent().parent().parent().addClass("selectedLi");
-				arrayItemsSeleccionados.push($(this).attr("value"));
-				
-				logg("presentar_datos", "Data Enviada:" +JSON.stringify(arrayItemsSeleccionados) , 176);
-				ws.conn.send(JSON.stringify(arrayItemsSeleccionados));
-				
-				if (boolPresentacionWirecloud) {
-					logg("presentar_datos", "Envio via Wiring:" +JSON.stringify(arrayItemsSeleccionados) , 179);
-					MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(arrayItemsSeleccionados));
-				}
-				
-			} else {
-				console.log(" uncheck: " + $(this).attr("value"));
-				$(this).parent().parent().parent().removeClass("selectedLi");
 				//arrayItemsSeleccionados.push($(this).attr("value"));
+
+				var obj = new Object();
+				obj.id = $(this).attr("value");
+				obj.check = 1;
+
+				logg("presentar_datos", "Data Enviada:" + JSON.stringify(obj), 176);
+				ws.conn.send(JSON.stringify(obj));
+
+				if (boolPresentacionWirecloud) {
+					logg("presentar_datos", "Envio via Wiring:" + JSON.stringify(obj), 179);
+					MashupPlatform.wiring.pushEvent('outputItem', obj.id);
+				}
+
+			} else {
+
+				$(this).parent().parent().parent().removeClass("selectedLi");
+
+				var obj = new Object();
+				obj.id = $(this).attr("value");
+				obj.check = 0;
+
+				logg("presentar_datos", "Data Enviada:" + JSON.stringify(obj), 176);
+				ws.conn.send(JSON.stringify(obj));
+
+				if (boolPresentacionWirecloud) {
+					logg("presentar_datos", "Envio via Wiring:" + JSON.stringify(obj), 179);
+					MashupPlatform.wiring.pushEvent('outputItem', JSON.stringify(obj.id));
+				}
+
 			}
 		});
 	}
 
-	/**
+/**
 	 * Establece la conexión con el servidord a traves de WebSocket
 	 * @author Carlos iniguez
 	 */
@@ -196,19 +212,18 @@ window.onbeforeunload = function() {
 
 		//Para la conexion con WebSocket se requiere el nombre identificador del widget para enviarlo al servidor.
 		if (getIdentificadorWebSocket() !== null && url !== null) {
-			if (ws !== null) {
-				ws.conn.close();
-				ws = null;
-				logg("crearWebSocket", "There already is a connection alive!. I will close it and start a newer", 466);
-			}else{
+			if (ws === null) {
 				logg("crearWebSocket", "Conectando a WebSocket con: " + url, 423);
-				ws = new MODELO.websocket(url, presentarDatos, noData, identificadorWebSocket);	
+				ws = new MODELO.websocket(url, presentarDatos, noData, identificadorWebSocket);
+			} else {
+				logg("crearWebSocket", "Ya existe un WebSocket Abierto", 315);
 			}
 		} else {
 			logg("crearWebSocket", "You must set the websocket url or identifier!", 466);
 			presentarDatos(null);
 		}
 	}
+
 
 	/**
 	 * Transforma los datos recibidos por el servidor a formato de datos solicitados por el widge.
@@ -271,13 +286,14 @@ window.onbeforeunload = function() {
 	 * @param nombreFuncion Nombre de la funcion de donde se lanza el mensaje
 	 * @param mensaje Texto a mostrar en el mensaje de salida
 	 * @param linea Número de Linea de codigo correspondiente donde se ejecuta el mensaje
+	 * @author Carlos iniguez
 	 */
 	function logg(nombreFuncion, mensaje, linea) {
 		if (environment === "dev") {
-			if (boolPresentacionWirecloud) {
-				MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			if (boolPresentacionWirecloud && identificadorWebSocket) {
+				MashupPlatform.widget.log("DEBUG: " + identificadorWebSocket + " : " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
 			} else {
-				console.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea);
+				console.log("DEBUG: " + identificadorWebSocket + " : " + nombreFuncion + "->" + mensaje + " in line: " + linea);
 			}
 
 		}

@@ -16,12 +16,14 @@
 		margin: 2%;
 	}
 }
-
-#msg p{
-	font-size: 0.7em;
-	color: red;
-	line-height: 1.2;
+#no-data{
+	text-align: center;
 }
-#msg p span{
-	color: blue;
+#no-data #contenido{
+	margin: 15px 0 15px 0;
+	display: inline-block;
+	width:128px;
+	height:128px;
+	background-image: url('../images/technology.png');
+	background-repeat: repeat-x;
 }

@@ -52,6 +52,7 @@ window.onbeforeunload = function() {
 
 		//TODO: Descomentar para trabajar en WIRECLOUD -------------
 		url = obtenerAtributoPreferencias('urlServicio');
+		identificadorWebSocket = obtenerAtributoPreferencias('websocketIdentifier');
 
 		/*
 		 * Registro los datos desde Preferencias (fichero config.xml)
@@ -71,6 +72,10 @@ window.onbeforeunload = function() {
 				parametroCambiado = "env";
 				environment = obtenerAtributoPreferencias('environment');
 			}
+			if ('websocketIdentifier' in new_values) {
+				parametroCambiado = "identificadorWebSocket";
+				identificadorWebSocket = obtenerAtributoPreferencias('websocketIdentifier');
+			}
 			if ('flagWorkspace' in new_values) {
 				parametroCambiado = "flagWorkspace";
 				flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
@@ -81,7 +86,6 @@ window.onbeforeunload = function() {
 
 			//llamo a que se ejecute la obtención de datos desde el servidor
 			logg("init", "parametro cambiado: " + parametroCambiado, 111);
-			dispararCambio(parametroCambiado);
 
 		});
 		//_---------------------------------------
@@ -96,50 +100,6 @@ window.onbeforeunload = function() {
 			}
 		} else {
 			logg("init", "Se requiere URL para iniciar. Configure y Reinicie el Widget!!.", 82);
-		}
-
-		//----------------------------------------------------------------------------------
-		//------------------------ HANDLERS PARA DETECTAR CAMBIOS EN PREFERENCIAS ----------
-		//----------------------------------------------------------------------------------
-		/*
-		 * Registro lo que ingresa como Preferencia
-		 * Si existe un cambio en un parámetro de preferencias, el método se dispara
-		 * para obtener el nuevo valor y llama a presentar los datos en el gráfico
-		 */
-		if (boolPresentacionWirecloud) {
-			MashupPlatform.prefs.registerCallback(function(new_values) {
-				parametroCambiado = "";
-				var boolean_flag = false;
-				if ('urlServicio' in new_values) {
-					url = obtenerAtributoPreferencias('urlServicio');
-					parametroCambiado = "url";
-				}
-				if ('environment' in new_values) {
-					parametroCambiado = "env";
-					environment = obtenerAtributoPreferencias('environment');
-				}
-				if ('websocketIdentifier' in new_values) {
-					parametroCambiado = "identificadorWebSocket";
-					identificadorWebSocket = obtenerAtributoPreferencias('websocketIdentifier');
-				}
-				if ('flagWorkspace' in new_values) {
-					parametroCambiado = "flagWorkspace";
-					flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
-					if (flagWorkspace === "wirecloud") {
-						boolPresentacionWirecloud = true;
-
-						url = obtenerAtributoPreferencias('urlServicio');
-						environment = obtenerAtributoPreferencias('environment');
-						crearWebSocket();
-					}
-					logg("init", "Configuracion:" + flagWorkspace, 173);
-				}
-
-				//llamo a que se ejecute la obtención de datos desde el servidor
-				logg("init", "parametro cambiado: " + parametroCambiado, 111);
-				dispararCambio(parametroCambiado);
-
-			});
 		}
 
 	}
@@ -250,19 +210,24 @@ window.onbeforeunload = function() {
 			break;
 		}
 
-		var idControl = wiringNameVariableRecibed + valueRecibed;
-		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-id="' + valueRecibed + '">' + '<div class="label">' + label + '</div>' + '<div class="btnDelete control"><a href="#">Delete</a></div>' + '</div>' + '</li>');
+		if (isNaN(valueRecibed)) {
+			valueRecibed = parseInt(valueRecibed);
+		}
+		var idControl = wiringNameVariableRecibed + Math.floor(Math.random() * (1000 - 2)) + 2;
+		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-id="' + valueRecibed + '">' + '<div class="label">' + label + ' (' + valueRecibed + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
 
 		//Asignacion de evento
-		$("#item_" + idControl + " .btnDelete a").on("click", function() {
+		$("#item_" + idControl + " .btnDelete span").on("click", function() {
 			var id = $(this).parent().parent().attr("data-id");
 			logg("noData", "Enviado al Servidor y Borrado de :" + id, 259);
-			ws.send(JSON.stringify(id));
-
+			ws.conn.send(JSON.stringify(id));
+			logg("noData", "Paso de servidor", 259);
+			
 			$(this).parent().parent().parent().addClass("onDeleteLi");
 			$(this).parent().fadeOut("3000", function() {
 				$(this).parent().parent().remove();
 			});
+			
 
 		});
 	}
@@ -272,8 +237,6 @@ window.onbeforeunload = function() {
 	 */
 	function noData(msg) {
 		logg("noData", msg, 87);
-		$('#list').empty();
-		$("#list").append('<li id="item_' + 0 + '" class="ui-widget-content">NO DATA</li>');
 	}
 
 	/**
@@ -297,7 +260,9 @@ window.onbeforeunload = function() {
 	};
 
 	function getIdentificadorWebSocket() {
-		identificadorWebSocket = getIdentificadorWebSocket();
+		if (identificadorWebSocket === null) {
+			identificadorWebSocket = obtenerAtributoPreferencias("websocketIdentifier");
+		}
 		return identificadorWebSocket;
 	}
 
@@ -309,17 +274,14 @@ window.onbeforeunload = function() {
 
 		//Para la conexion con WebSocket se requiere el nombre identificador del widget para enviarlo al servidor.
 		if (getIdentificadorWebSocket() !== null && url !== null) {
-			if (ws !== null) {
-				ws.conn.close();
-				ws = null;
-				logg("crearWebSocket", "There already is a connection alive!. I will close it and start a newer", 466);
-			} else {
+			if (ws === null) {
 				logg("crearWebSocket", "Conectando a WebSocket con: " + url, 423);
-				ws = new MODELO.websocket(url, presentarDatos, noData, identificadorWebSocket);
+				ws = new MODELO.websocket(url, noData, noData, identificadorWebSocket);
+			} else {
+				logg("crearWebSocket", "Ya existe un WebSocket Abierto", 315);
 			}
 		} else {
 			logg("crearWebSocket", "You must set the websocket url or identifier!", 466);
-			presentarDatos(null);
 		}
 	}
 
@@ -328,13 +290,14 @@ window.onbeforeunload = function() {
 	 * @param nombreFuncion Nombre de la funcion de donde se lanza el mensaje
 	 * @param mensaje Texto a mostrar en el mensaje de salida
 	 * @param linea Número de Linea de codigo correspondiente donde se ejecuta el mensaje
+	 * @author Carlos iniguez
 	 */
 	function logg(nombreFuncion, mensaje, linea) {
 		if (environment === "dev") {
-			if (boolPresentacionWirecloud) {
-				MashupPlatform.widget.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
+			if (boolPresentacionWirecloud && identificadorWebSocket) {
+				MashupPlatform.widget.log("DEBUG: " + identificadorWebSocket + " : " + nombreFuncion + "->" + mensaje + " in line: " + linea, MashupPlatform.log.INFO);
 			} else {
-				console.log("DEBUG: " + nombreFuncion + "->" + mensaje + " in line: " + linea);
+				console.log("DEBUG: " + identificadorWebSocket + " : " + nombreFuncion + "->" + mensaje + " in line: " + linea);
 			}
 
 		}

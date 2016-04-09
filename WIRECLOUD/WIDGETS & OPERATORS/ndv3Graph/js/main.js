@@ -15,7 +15,7 @@
 
 //Si se cierra el Navegador, cerrar el WebSocket activo.
 window.onbeforeunload = function() {
-	if (MODELO.websocket.singleInstance.conn) {
+	if (MODELO.websocket.singleInstance) {
 		console.log(MODELO.websocket.singleInstance.conn.readyState);
 		if (MODELO.websocket.singleInstance.conn.readyState != WebSocket.CLOSED) {
 			MODELO.websocket.singleInstance.conn.close(1000);
@@ -58,14 +58,16 @@ window.onbeforeunload = function() {
 	 */
 	function init() {
 
+		//Ocultar mensaje de desconexion
+		$("#no-data").hide();
+
 		//TODO: Descomentar para trabajar en LOCAL----
 		//url = "ws://158.42.185.198:8080/graphws2";
 		// -------------------------------------------
-		
-		
+
 		//TODO: Descomentar para trabajar en WIRECLOUD -------------
 		url = obtenerAtributoPreferencias('urlServicio');
-		
+
 		/*
 		 * Registro los datos desde Preferencias (fichero config.xml)
 		 * Si existe un cambio en un parámetro de preferencias, este método se dispara
@@ -110,7 +112,7 @@ window.onbeforeunload = function() {
 
 		});
 
-		//_--------------------------------------- 
+		//_---------------------------------------
 		if (url !== null) {
 			//Tomamos los valores desde preferencias config.xml
 			flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
@@ -121,13 +123,15 @@ window.onbeforeunload = function() {
 			} else {
 				settingToLocal();
 			}
-			
+
 		} else {
 			logg("init", "Se requiere URL para iniciar. Configure y Reinicie el Widget!!.", 82);
 		}
 	}
 
 	function settingToLocal() {
+		//Ocultar mensaje de desconexion
+		$("#no-data").show();
 		//TODO: Aqui poner algo en pantalla indicando que se requiere configurar y quitar todo lo que esta aqui abacjo
 		logg("init", "Configurando como local.", 94);
 		//local settings only by testing
@@ -140,6 +144,8 @@ window.onbeforeunload = function() {
 	}
 
 	function settingToWirecloud() {
+		//Ocultar mensaje de desconexion
+		$("#no-data").hide();
 		logg("init", "Configurando como Wirecloud.", 105);
 		url = obtenerAtributoPreferencias('urlServicio');
 		typeGraph = obtenerAtributoPreferencias('typeGraph');
@@ -149,7 +155,6 @@ window.onbeforeunload = function() {
 		//Variable para saber si se ejecuta en Ambiente de producción o debug
 		//(debug muestra los mensajes de código)
 		environment = obtenerAtributoPreferencias('environment');
-		
 
 	}
 
