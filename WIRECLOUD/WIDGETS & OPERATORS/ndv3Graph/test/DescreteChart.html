@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc.">
+		<meta name="author" content="Coderthemes">
+
+		<link rel="shortcut icon" href="assets/images/favicon_1.ico">
+
+		<title>Minton - Responsive Admin Dashboard Template</title>
+
+		<link href="assets/plugins/nvd3/build/nv.d3.min.css" rel="stylesheet" type="text/css" />
+
+	</head>
+
+	<body class="fixed-left">
+
+		<!-- Begin page -->
+		<div id="wrapper">
+
+			<div class="content-page">
+				<!-- Start content -->
+				<div class="content">
+					<div class="container">
+
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="card-box">
+									<h4 class="m-t-0 m-b-20 header-title"><b>Discrete Bar Chart</b></h4>
+
+									<div class="bar-chart">
+										<svg style="height:400px;width:100%"></svg>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<!-- end content -->
+
+				</div>
+				<!-- ============================================================== -->
+				<!-- End Right content here -->
+				<!-- ============================================================== -->
+
+			</div>
+			<!-- END wrapper -->
+
+			<script>
+				var resizefunc = [];
+			</script>
+
+			<!-- Plugins  -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/bootstrap.min.js"></script>
+
+			<!-- Nvd3 js -->
+			<script src="../assets/d3/d3.js"></script>
+			<script src="../assets/nvd3/build/nv.d3.js"></script>
+			<script>
+				var historicalBarChart = [{
+					key : 'Cumulative Return',
+					values : [{
+						'label' : 'A Label',
+						'value' : -29.765957771107,
+						'color' : '#00b19d',
+						'key':1
+					}, {
+						'label' : 'B Label',
+						'value' : 50,
+						'color' : '#ef5350',
+						'key':2
+					}, {
+						'label' : 'C Label',
+						'value' : 32.807804682612,
+						'color' : '#3DDCF7',
+						'key':3
+					}, {
+						'label' : 'D Label',
+						'value' : 196.45946739256,
+						'color' : '#ffaa00',
+						'key':4
+					}, {
+						'label' : 'E Label',
+						'value' : 15.79434030906893,
+						'color' : '#81c868',
+						'key':5
+					}, {
+						'label' : 'F Label',
+						'value' : -98.079782601442,
+						'color' : '#dcdcdc',
+						'key':6
+					}, {
+						'label' : 'G Label',
+						'value' : -13.925743130903,
+						'color' : '#333333',
+						'key':7
+					}, {
+						'label' : 'H Label',
+						'value' : -5.1387322875705,
+						'color' : '#3bafda',
+						'key':8
+					}]
+				}];
+
+				var chart = nv.models.discreteBarChart().x(function(d) {
+					return d.label;
+				}).y(function(d) {
+					return d.value;
+				}).staggerLabels(false).showValues(true).duration(250);
+
+				chart.yAxis.axisLabel('Price change in USD');
+				chart.tooltip.enabled();
+
+				d3.select('.bar-chart svg').datum(historicalBarChart).call(chart);
+				nv.utils.windowResize(chart.update);
+
+				chart.discretebar.dispatch.on("elementClick", function(e) {
+					//var obj = [e.index.toString()];
+					console.log(e.data.key);
+				});
+				nv.addGraph(chart);
+
+			</script>
+
+	</body>
+</html>

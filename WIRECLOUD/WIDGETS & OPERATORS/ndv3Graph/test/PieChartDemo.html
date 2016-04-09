@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<meta name="description" content="A fully featured admin theme which can be used to build CRM, CMS, etc.">
+		<meta name="author" content="Coderthemes">
+
+		<link rel="shortcut icon" href="assets/images/favicon_1.ico">
+
+		<title>Minton - Responsive Admin Dashboard Template</title>
+
+		<link href="assets/plugins/nvd3/build/nv.d3.min.css" rel="stylesheet" type="text/css" />
+
+		<!--link href="assets/plugins/switchery/switchery.min.css" rel="stylesheet" /-->
+		<!--link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"-->
+		<!--link href="assets/css/core.css" rel="stylesheet" type="text/css">
+		<link href="assets/css/icons.css" rel="stylesheet" type="text/css">
+		<link href="assets/css/components.css" rel="stylesheet" type="text/css">
+		<link href="assets/css/pages.css" rel="stylesheet" type="text/css">
+		<link href="assets/css/menu.css" rel="stylesheet" type="text/css">
+		<link href="assets/css/responsive.css" rel="stylesheet" type="text/css">
+
+		<script src="assets/js/modernizr.min.js"></script-->
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+		<![endif]-->
+
+	</head>
+
+	<body class="fixed-left">
+
+		<!-- Begin page -->
+		<div id="wrapper">
+
+			<div class="content-page">
+				<!-- Start content -->
+				<div class="content">
+					<div class="container">
+
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="card-box">
+									<h4 class="m-t-0 m-b-20 header-title"><b>Discrete Bar Chart</b></h4>
+
+									<div class="bar-chart">
+										<svg style="height:400px;width:100%"></svg>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="card-box">
+									<h4 class="m-t-0 m-b-20 header-title"><b>Pie Chart &amp; Donut Chart</b></h4>
+									<div class="row">
+										<div class="col-md-6">
+											<div id="chart1">
+												<svg style="height:500px;width:100%"></svg>
+											</div>
+										</div>
+
+										<div class="col-md-6">
+											<div id="chart2">
+												<svg style="height:500px;width:100%"></svg>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<!-- end container -->
+
+				</div>
+				<!-- end content -->
+
+			</div>
+			<!-- ============================================================== -->
+			<!-- End Right content here -->
+			<!-- ============================================================== -->
+
+		</div>
+		<!-- END wrapper -->
+
+		<script>
+			var resizefunc = [];
+		</script>
+
+		<!-- Plugins  -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/bootstrap.min.js"></script>
+		<!--script src="assets/js/detect.js"></script>
+		<script src="assets/js/fastclick.js"></script>
+		<script src="assets/js/jquery.slimscroll.js"></script>
+		<script src="assets/js/jquery.blockUI.js"></script-->
+		<!--script src="assets/js/waves.js"></script-->
+		<!--script src="assets/js/wow.min.js"></script-->
+		<!--script src="assets/js/jquery.nicescroll.js"></script-->
+		<!--script src="assets/js/jquery.scrollTo.min.js"></script-->
+		<!--script src="assets/plugins/switchery/switchery.min.js"></script-->
+
+		<!-- Nvd3 js -->
+		<script src="../assets/d3/d3.js"></script>
+		<script src="../assets/nvd3/build/nv.d3.js"></script>
+		<!--script src="assets/pages/jquery.nvd3.init.js"></script-->
+
+		<!--script src="assets/js/jquery.core.js"></script-->
+		<!--script src="assets/js/jquery.app.js"></script-->
+		<script>
+			//Pie chart example data. Note how there is only a single array of key-value pairs.
+			function exampleData() {
+				return [{
+					"label" : "One",
+					"value" : 29.765957771107,
+					"color" : "#00b19d",
+					"key": 1
+				}, {
+					"label" : "Two",
+					"value" : 60,
+					'color' : '#ef5350',
+					"key": 2
+				}, {
+					"label" : "Three",
+					"value" : 39.69895,
+					'color' : '#3ddcf7',
+					"key": 3
+				}, {
+					"label" : "Four",
+					"value" : 160.45946739256,
+					'color' : '#ffaa00',
+					"key": 4
+				}, {
+					"label" : "Five",
+					"value" : 89.02525,
+					'color' : '#81c868',
+					"key": 5
+				}, {
+					"label" : "Six",
+					"value" : 98.079782601442,
+					'color' : '#dcdcdc',
+					"key": 6
+				}, {
+					"label" : "Seven",
+					"value" : 98.925743130903,
+					'color' : '#3bafda',
+					"key": 7
+				}];
+			}
+
+			var chart = nv.models.pieChart().x(function(d) {
+				return d.label;
+			}).y(function(d) {
+				return d.value;
+			}).showLabels(true)//Display pie labels
+			.labelThreshold(.05)//Configure the minimum slice size for labels to show up
+			.labelType("percent")//Configure what type of data to show in the label. Can be "key", "value" or "percent"
+			.donut(true)//Turn on Donut mode. Makes pie chart look tasty!
+			.donutRatio(0.35)//Configure how big you want the donut hole size to be.
+			;
+
+			d3.select("#chart1 svg").datum(exampleData).transition().duration(350).call(chart);
+			nv.utils.windowResize(chart.update);
+
+			chart.pie.dispatch.on("elementClick", function(e) {
+				var obj = [JSON.stringify(e.data.key)];
+				//Verificar conexión OPEN, si así se envía el objeto
+				console.log(obj);
+
+			});
+			nv.addGraph(chart);
+
+		</script>
+
+	</body>
+</html>

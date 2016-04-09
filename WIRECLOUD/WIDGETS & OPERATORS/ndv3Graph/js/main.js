@@ -16,7 +16,10 @@
 //Si se cierra el Navegador, cerrar el WebSocket activo.
 window.onbeforeunload = function() {
 	if (MODELO.websocket.singleInstance) {
-		console.log(MODELO.websocket.singleInstance.conn.readyState);
+		if (MODELO.websocket.singleInstance.conn.readyState === 1) {
+			console.log("Estado Conexión: OPEN");
+		}
+
 		if (MODELO.websocket.singleInstance.conn.readyState != WebSocket.CLOSED) {
 			MODELO.websocket.singleInstance.conn.close(1000);
 			console.log("ws cerrado");
@@ -129,10 +132,30 @@ window.onbeforeunload = function() {
 		}
 	}
 
+	function getNombreLegibleAttr1() {
+		var nombre = null;
+		if (attr1 !== null) {
+			switch(attr1) {
+			case "chromosome":
+				nombre = "Choromosome";
+				break;
+			case "phenotype":
+				nombre = "Phenotype";
+				break;
+			case "clinicalSignificance":
+				nombre = "Clinical Significance";
+				break;
+			}
+		} else {
+			nombre = "Main variable";
+		}
+		return nombre;
+	}
+
 	function settingToLocal() {
 		//Ocultar mensaje de desconexion
 		$("#no-data").show();
-		//TODO: Aqui poner algo en pantalla indicando que se requiere configurar y quitar todo lo que esta aqui abacjo
+
 		logg("init", "Configurando como local.", 94);
 		//local settings only by testing
 		//typeGraph = "pieChart";
@@ -227,10 +250,9 @@ window.onbeforeunload = function() {
 				"value" : 196.45946739256
 			}];
 
-			logg("pieChart", "No hay datos. Seteando Default data", 233);
+			logg("pieChart", "Datos nulos obtenidos en Servidor, ...iniciando con datos por defecto!", 236);
 		} else {
 			data = JSON.parse(transformadorDataPieChar(data));
-			logg("pieChart", "Datos nulos obtenidos en Servidor, ...iniciando con datos por defecto!", 236);
 		}
 
 		$(".chart svg").empty();
@@ -252,15 +274,18 @@ window.onbeforeunload = function() {
 		nv.utils.windowResize(chart.update);
 
 		chart.pie.dispatch.on("elementClick", function(e) {
-			var obj = [e.index.toString()];
+			var obj = [e.data.key];
 			logg("init", "transformacion obj: " + JSON.stringify(obj), 163);
 			//Envio datos por wiring
 			if (boolPresentacionWirecloud) {
 				//wiring the chromosome number
 				MashupPlatform.wiring.pushEvent('outputVar', JSON.stringify(obj));
 			}
-			if (ws) {
+			//Verificar conexión OPEN, si así se envía el objeto
+			if (ws.conn.readyState == 1) {
 				ws.conn.send(JSON.stringify(obj));
+			} else {
+				logg("pieChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 269);
 			}
 
 		});
@@ -280,13 +305,16 @@ window.onbeforeunload = function() {
 				key : "Cumulative Return",
 				values : [{
 					"label" : "A Label",
-					"value" : -29.765957771107
+					"value" : -29.765957771107,
+					"key" : 1
 				}, {
 					"label" : "B Label",
-					"value" : 0
+					"value" : 0,
+					"key" : 2
 				}, {
 					"label" : "C Label",
-					"value" : 32.807804682612
+					"value" : 32.807804682612,
+					"key" : 3
 				}]
 			}];
 		} else {
@@ -308,17 +336,19 @@ window.onbeforeunload = function() {
 		nv.utils.windowResize(chart.update);
 
 		chart.discretebar.dispatch.on("elementClick", function(e) {
-			logg("init", "pulsacion bar char: " + e, 163);
-			var obj = [e.index.toString()];
+			var obj = [e.data.key];
 			logg("init", "transformacion obj: " + obj, 163);
 
 			//Envio datos por wiring
 			if (boolPresentacionWirecloud) {
 				//wiring the chromosome number
-				MashupPlatform.wiring.pushEvent('outputVar', e.index.toString());
+				MashupPlatform.wiring.pushEvent('outputVar', JSON.stringify(obj));
 			}
-			if (ws) {
+			//Verificar conexión OPEN, si así se envía el objeto
+			if (ws.conn.readyState == 1) {
 				ws.conn.send(JSON.stringify(obj));
+			} else {
+				logg("discreteBarChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 330);
 			}
 
 		});
@@ -347,9 +377,10 @@ window.onbeforeunload = function() {
 				//preparar json en formato que absorve el gráfico
 				for (var i = 0; i < json.length; i++) {
 					var v = new Object();
-					v.label = json[i].id;
+					v.label = json[i].name;
 					v.value = json[i].size;
 					//v.color = '#00b19d';
+					v.key = json[i].id;
 					valuesToDataGrafico.push(v);
 				}
 
@@ -389,14 +420,15 @@ window.onbeforeunload = function() {
 			//preparar json en formato que absorve el gráfico
 			for (var i = 0; i < json.length; i++) {
 				var v = new Object();
-				v.label = json[i].id;
+				v.label = json[i].name;
 				v.value = json[i].size;
 				v.color = dame_color_aleatorio();
+				v.key = json[i].id;
 
 				valuesToDataGrafico.push(v);
 			}
 			//Agrego las propiedades key y values del objeto total
-			objDataGrafico.key = 'Cumulative Return';
+			objDataGrafico.key = getNombreLegibleAttr1() + 'by Variants';
 			objDataGrafico.values = valuesToDataGrafico;
 			//Agregar el objeto total al array raiz
 			arrayContendor.push(objDataGrafico);
