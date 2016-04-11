@@ -195,9 +195,6 @@ window.onbeforeunload = function() {
 	 * @author Carlos iniguez
 	 */
 	function noData(msg) {
-		//$("#msg").empty();
-		//$("#msg").append("<p>Faults!</br>App says: <span>" + msg + "</span></p>");
-		//$("#msg").fadeOut(5000);
 		logg("noData", "Gendomus says: " + msg, 191);
 	}
 
@@ -274,7 +271,13 @@ window.onbeforeunload = function() {
 		nv.utils.windowResize(chart.update);
 
 		chart.pie.dispatch.on("elementClick", function(e) {
-			var obj = [e.data.key];
+			sedDataToServerAndWiring(e.data);
+		});
+		return chart;
+
+	}
+	function sedDataToServerAndWiring(objData){
+		var obj = [objData];
 			logg("init", "transformacion obj: " + JSON.stringify(obj), 163);
 			//Envio datos por wiring
 			if (boolPresentacionWirecloud) {
@@ -287,9 +290,6 @@ window.onbeforeunload = function() {
 			} else {
 				logg("pieChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 269);
 			}
-
-		});
-		return chart;
 
 	}
 
@@ -336,21 +336,7 @@ window.onbeforeunload = function() {
 		nv.utils.windowResize(chart.update);
 
 		chart.discretebar.dispatch.on("elementClick", function(e) {
-			var obj = [e.data.key];
-			logg("init", "transformacion obj: " + obj, 163);
-
-			//Envio datos por wiring
-			if (boolPresentacionWirecloud) {
-				//wiring the chromosome number
-				MashupPlatform.wiring.pushEvent('outputVar', JSON.stringify(obj));
-			}
-			//Verificar conexión OPEN, si así se envía el objeto
-			if (ws.conn.readyState == 1) {
-				ws.conn.send(JSON.stringify(obj));
-			} else {
-				logg("discreteBarChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 330);
-			}
-
+			sedDataToServerAndWiring(e.data);
 		});
 		return chart;
 

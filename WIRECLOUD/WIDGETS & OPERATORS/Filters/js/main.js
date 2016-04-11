@@ -4,7 +4,10 @@
 //Si se cierra el Navegador, cerrar el WebSocket activo.
 window.onbeforeunload = function() {
 	if (MODELO.websocket.singleInstance) {
-		console.log(MODELO.websocket.singleInstance.conn.readyState);
+		if (MODELO.websocket.singleInstance.conn.readyState === 1) {
+			console.log("Estado Conexión: OPEN");
+		}
+
 		if (MODELO.websocket.singleInstance.conn.readyState != WebSocket.CLOSED) {
 			MODELO.websocket.singleInstance.conn.close(1000);
 			console.log("ws cerrado");
@@ -79,42 +82,51 @@ window.onbeforeunload = function() {
 			if ('flagWorkspace' in new_values) {
 				parametroCambiado = "flagWorkspace";
 				flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
-				if (flagWorkspace !== "wirecloud") {
-					boolPresentacionWirecloud = false;
-				}
 			}
 
-			//llamo a que se ejecute la obtención de datos desde el servidor
 			logg("init", "parametro cambiado: " + parametroCambiado, 111);
+
+			if (flagWorkspace !== "wirecloud" && parametroCambiado === "flagWorkspace") {
+				settingToWirecloud();
+			} else {
+				settingToWirecloud();
+			}
 
 		});
 		//_---------------------------------------
 		if (url !== null) {
-			//Tomamos los valores desde preferencias config.xml
+			//Getting values from preferences (See more: config.xml)
 			flagWorkspace = obtenerAtributoPreferencias('flagWorkspace');
 			if (flagWorkspace === "wirecloud") {
-				boolPresentacionWirecloud = true;
 				settingToWirecloud();
 			} else {
 				settingToLocal();
 			}
 		} else {
-			logg("init", "Se requiere URL para iniciar. Configure y Reinicie el Widget!!.", 82);
+			logg("init", "An URL is required to start. Set and Restart the Widget!!.", 82);
 		}
 
 	}
 
+	/**
+	 * Setting behavior where a local connection is performed.
+	 * Show the disconnect image on screen.
+	 */
 	function settingToLocal() {
-		//Ocultar mensaje de desconexion
+		boolPresentacionWirecloud = false;
+		//Show the disconnection image
 		$("#no-data").show();
-		//TODO: Aqui poner algo en pantalla indicando que se requiere configurar y quitar todo lo que esta aqui abacjo
 		logg("init", "Configurando como local.", 94);
 		//local settings only by testing
 		environment = "dev";
 	}
 
+	/**
+	 * Setting behavior where a Wirecloud connection is performed
+	 */
 	function settingToWirecloud() {
-		//Ocultar mensaje de desconexion
+		boolPresentacionWirecloud = true;
+		//Hide the disconnection image
 		$("#no-data").hide();
 
 		logg("init", "Configurando como Wirecloud.", 105);
@@ -122,7 +134,6 @@ window.onbeforeunload = function() {
 		environment = obtenerAtributoPreferencias('environment');
 		identificadorWebSocket = getIdentificadorWebSocket();
 
-		logg("init", "iniciando en Wirecloud", 42);
 		//REGISTRO DE WIRING
 		/* Add register to wiring the Cromosome input value*/
 		MashupPlatform.wiring.registerCallback("inChr", handlerSlotChr);
@@ -185,11 +196,16 @@ window.onbeforeunload = function() {
 			logg("handlerSlot", "No existe emparejamiento con la preferencia solicitada", 357);
 		}
 	};
-
-	function presentarDatos(wiringNameVariableRecibed, valueRecibed) {
-		logg("init", "ingresa a function de presentacion", 90);
+	/**
+	 * Show data on screen
+	 * @param wiringNameVariableRecibed Variable name to identify the data type to present.
+	 * @param objInfoJSONText A string which represent an JSON object (id, label, value), it is the information to show.
+	 * @author Carlos Iniguez
+	 */
+	function presentarDatos(wiringNameVariableRecibed, objInfoJSONText) {
 		var label = "";
 		var id = "all";
+		var objInfo = JSON.parse(objInfoJSON);
 
 		switch(wiringNameVariableRecibed) {
 		case "inChr":
@@ -201,7 +217,7 @@ window.onbeforeunload = function() {
 			id = "phenotype";
 			break;
 		case "inClinical":
-			label = "Cln. Significance ";
+			label = "Clin. Significance ";
 			id = "clinicalSignificance";
 			break;
 		case "inSam":
@@ -210,24 +226,27 @@ window.onbeforeunload = function() {
 			break;
 		}
 
-		if (isNaN(valueRecibed)) {
-			valueRecibed = parseInt(valueRecibed);
-		}
 		var idControl = wiringNameVariableRecibed + Math.floor(Math.random() * (1000 - 2)) + 2;
-		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-id="' + valueRecibed + '">' + '<div class="label">' + label + ' (' + valueRecibed + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
 
-		//Asignacion de evento
+		//Add to List, an element <li> with the data to be shown on screen
+		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.id + '">' + '<div class="label">' + label + ' (' + obj.name + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
+
+		//Event assignment to Delete Command (inside <li>)
 		$("#item_" + idControl + " .btnDelete span").on("click", function() {
-			var id = $(this).parent().parent().attr("data-id");
-			logg("noData", "Enviado al Servidor y Borrado de :" + id, 259);
-			ws.conn.send(JSON.stringify(id));
-			logg("noData", "Paso de servidor", 259);
-			
+			var objEnvio = new Object();
+			objEnvio.id = $(this).parent().parent().attr("data-id");
+			objEnvio.variable = $(this).parent().parent().attr("data-variable");
+
+			logg("noData", "Send to Server then delete:" + JSON.stringify(objEnvio), 259);
+			ws.conn.send(JSON.stringify(objEnvio));
+			objEnvio = null;
+
+			//Effect: Add class to element to state it will be deleted.
 			$(this).parent().parent().parent().addClass("onDeleteLi");
+			//Effect: Fade Out the element then it will be deleted.
 			$(this).parent().fadeOut("3000", function() {
 				$(this).parent().parent().remove();
 			});
-			
 
 		});
 	}
@@ -237,13 +256,6 @@ window.onbeforeunload = function() {
 	 */
 	function noData(msg) {
 		logg("noData", msg, 87);
-	}
-
-	/**
-	 * Esta funcion es llamada cuando no se encontró datos en el servidor.
-	 */
-	function recepcionServer(msg) {
-		logg("recepcionServer", msg, 251);
 	}
 
 	/**
@@ -259,6 +271,10 @@ window.onbeforeunload = function() {
 		return atributo;
 	};
 
+	/**
+	 * Get the Identifier Name of Websocket from prefferences (config.xml).
+	 * It is neccesary to difference the several websocket connection on the server.
+	 */
 	function getIdentificadorWebSocket() {
 		if (identificadorWebSocket === null) {
 			identificadorWebSocket = obtenerAtributoPreferencias("websocketIdentifier");
@@ -267,21 +283,20 @@ window.onbeforeunload = function() {
 	}
 
 	/**
-	 * Establece la conexión con el servidord a traves de WebSocket
+	 * Stablishing the connection with the server through WebSocket.
+	 * The connection through WebSocket requires a name of identifier and the url.
 	 * @author Carlos iniguez
 	 */
 	function crearWebSocket() {
-
-		//Para la conexion con WebSocket se requiere el nombre identificador del widget para enviarlo al servidor.
 		if (getIdentificadorWebSocket() !== null && url !== null) {
 			if (ws === null) {
-				logg("crearWebSocket", "Conectando a WebSocket con: " + url, 423);
+				logg("crearWebSocket", "Connecting through WebSocket with: " + url, 423);
 				ws = new MODELO.websocket(url, noData, noData, identificadorWebSocket);
 			} else {
-				logg("crearWebSocket", "Ya existe un WebSocket Abierto", 315);
+				logg("crearWebSocket", "There already is an open websocket", 315);
 			}
 		} else {
-			logg("crearWebSocket", "You must set the websocket url or identifier!", 466);
+			logg("crearWebSocket", "Websocket no connected!! A websocket url and an identifier is required!", 466);
 		}
 	}
 
