@@ -205,7 +205,7 @@ window.onbeforeunload = function() {
 	function presentarDatos(wiringNameVariableRecibed, objInfoJSONText) {
 		var label = "";
 		var id = "all";
-		var objInfo = JSON.parse(objInfoJSON);
+		var objInfo = JSON.parse(objInfoJSONText);
 
 		switch(wiringNameVariableRecibed) {
 		case "inChr":
@@ -229,13 +229,13 @@ window.onbeforeunload = function() {
 		var idControl = wiringNameVariableRecibed + Math.floor(Math.random() * (1000 - 2)) + 2;
 
 		//Add to List, an element <li> with the data to be shown on screen
-		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.id + '">' + '<div class="label">' + label + ' (' + obj.name + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
+		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.key + '">' + '<div class="label">' + label + ' (' + objInfo.label + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
 
 		//Event assignment to Delete Command (inside <li>)
 		$("#item_" + idControl + " .btnDelete span").on("click", function() {
 			var objEnvio = new Object();
 			objEnvio.id = $(this).parent().parent().attr("data-id");
-			objEnvio.variable = $(this).parent().parent().attr("data-variable");
+			objEnvio.type = $(this).parent().parent().attr("data-variable");
 
 			logg("noData", "Send to Server then delete:" + JSON.stringify(objEnvio), 259);
 			ws.conn.send(JSON.stringify(objEnvio));

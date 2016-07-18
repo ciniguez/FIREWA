@@ -1,0 +1,35 @@
+<link rel="import" href="../polymer.html">
+
+<dom-module id="project-info">
+
+	<template>
+		<div id="project-info-container" class="card-box">
+			<h2><a href="#">{{title}}</a></h2>
+			<div>
+				<p>
+					<div>
+						<b>Name:</b>
+					</div>
+					<div>
+						<span id="lblNombreProyecto">CODE-0013X4TFG</span>
+					</div>
+				</p>
+				<p>
+					<div>
+						<b>Descripcion</b>
+					</div>
+
+					<div>
+						<span id="lblDescripcion">Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen. No sólo sobrevivió 500 años.</span>
+					</div>
+				</p>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : 'project-info',
+			title : String
+		});
+	</script>
+</dom-module>

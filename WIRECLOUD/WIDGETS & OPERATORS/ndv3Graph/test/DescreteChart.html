@@ -10,7 +10,19 @@
 
 		<title>Minton - Responsive Admin Dashboard Template</title>
 
-		<link href="assets/plugins/nvd3/build/nv.d3.min.css" rel="stylesheet" type="text/css" />
+		<link href="../assets/nvd3/build/nv.d3.min.css" rel="stylesheet" type="text/css" />
+		<style>
+			.card-box {
+				padding: 20px;
+				border: 1px solid rgba(54, 64, 74, 0.08);
+				-webkit-border-radius: 5px;
+				border-radius: 5px;
+				-moz-border-radius: 5px;
+				background-clip: padding-box;
+				margin-bottom: 20px;
+				background-color: #fff;
+			}
+		</style>
 
 	</head>
 
@@ -27,10 +39,10 @@
 						<div class="row">
 							<div class="col-sm-12">
 								<div class="card-box">
-									<h4 class="m-t-0 m-b-20 header-title"><b>Discrete Bar Chart</b></h4>
+									<!--h4 class="m-t-0 m-b-20 header-title"><b>Discrete Bar Chart</b></h4-->
 
 									<div class="bar-chart">
-										<svg style="height:400px;width:100%"></svg>
+										<svg style="height:300px;width:100%"></svg>
 									</div>
 								</div>
 							</div>
@@ -65,42 +77,42 @@
 						'label' : 'A Label',
 						'value' : -29.765957771107,
 						'color' : '#00b19d',
-						'key':1
+						'key' : 1
 					}, {
 						'label' : 'B Label',
 						'value' : 50,
 						'color' : '#ef5350',
-						'key':2
+						'key' : 2
 					}, {
 						'label' : 'C Label',
 						'value' : 32.807804682612,
 						'color' : '#3DDCF7',
-						'key':3
+						'key' : 3
 					}, {
 						'label' : 'D Label',
 						'value' : 196.45946739256,
 						'color' : '#ffaa00',
-						'key':4
+						'key' : 4
 					}, {
 						'label' : 'E Label',
 						'value' : 15.79434030906893,
 						'color' : '#81c868',
-						'key':5
+						'key' : 5
 					}, {
 						'label' : 'F Label',
 						'value' : -98.079782601442,
 						'color' : '#dcdcdc',
-						'key':6
+						'key' : 6
 					}, {
 						'label' : 'G Label',
 						'value' : -13.925743130903,
 						'color' : '#333333',
-						'key':7
+						'key' : 7
 					}, {
 						'label' : 'H Label',
 						'value' : -5.1387322875705,
 						'color' : '#3bafda',
-						'key':8
+						'key' : 8
 					}]
 				}];
 
@@ -108,10 +120,11 @@
 					return d.label;
 				}).y(function(d) {
 					return d.value;
-				}).staggerLabels(false).showValues(true).duration(250);
+				}).staggerLabels(true).showValues(true).duration(250);
 
 				chart.yAxis.axisLabel('Price change in USD');
-				chart.tooltip.enabled();
+				chart.tooltip.enabled(false);
+				//chart.tooltips(true);
 
 				d3.select('.bar-chart svg').datum(historicalBarChart).call(chart);
 				nv.utils.windowResize(chart.update);

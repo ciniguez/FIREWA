@@ -153,8 +153,16 @@ window.onbeforeunload = function() {
 	}
 
 	function settingToLocal() {
-		//Ocultar mensaje de desconexion
+		//Show mensaje de desconexion
 		$("#no-data").show();
+
+		//Close Websocket Connection
+		if (ws != null) {
+			if (ws.readyState != WebSocket.CLOSED) {
+				ws.conn.close(1000);
+				console.log("ws cerrado");
+			}
+		}
 
 		logg("init", "Configurando como local.", 94);
 		//local settings only by testing
@@ -167,6 +175,7 @@ window.onbeforeunload = function() {
 	}
 
 	function settingToWirecloud() {
+		boolPresentacionWirecloud = true;
 		//Ocultar mensaje de desconexion
 		$("#no-data").hide();
 		logg("init", "Configurando como Wirecloud.", 105);
@@ -178,6 +187,7 @@ window.onbeforeunload = function() {
 		//Variable para saber si se ejecuta en Ambiente de producción o debug
 		//(debug muestra los mensajes de código)
 		environment = obtenerAtributoPreferencias('environment');
+		crearWebSocket();
 
 	}
 
@@ -269,27 +279,25 @@ window.onbeforeunload = function() {
 
 		d3.select(".chart svg").datum(data).transition().duration(350).call(chart);
 		nv.utils.windowResize(chart.update);
-
 		chart.pie.dispatch.on("elementClick", function(e) {
 			sedDataToServerAndWiring(e.data);
 		});
 		return chart;
-
 	}
-	function sedDataToServerAndWiring(objData){
-		var obj = [objData];
-			logg("init", "transformacion obj: " + JSON.stringify(obj), 163);
-			//Envio datos por wiring
-			if (boolPresentacionWirecloud) {
-				//wiring the chromosome number
-				MashupPlatform.wiring.pushEvent('outputVar', JSON.stringify(obj));
-			}
-			//Verificar conexión OPEN, si así se envía el objeto
-			if (ws.conn.readyState == 1) {
-				ws.conn.send(JSON.stringify(obj));
-			} else {
-				logg("pieChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 269);
-			}
+
+	function sedDataToServerAndWiring(objData) {
+		logg("init", "transformacion obj: " + JSON.stringify(objData), 163);
+		//Envio datos por wiring
+		if (boolPresentacionWirecloud) {
+			//wiring the chromosome number
+			MashupPlatform.wiring.pushEvent('outputVar', JSON.stringify(objData));
+		}
+		//Verificar conexión OPEN, si así se envía el objeto
+		if (ws.conn.readyState == 1) {
+			ws.conn.send(objData.key);
+		} else {
+			logg("pieChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 269);
+		}
 
 	}
 
@@ -329,8 +337,8 @@ window.onbeforeunload = function() {
 			return d.value;
 		}).staggerLabels(false).showValues(true).duration(250);
 
-		chart.yAxis.axisLabel('Price change in USD');
-		chart.tooltip.enabled();
+		chart.yAxis.axisLabel('Variants');
+		chart.tooltip.enabled(false);
 
 		d3.select('.chart svg').datum(data).call(chart);
 		nv.utils.windowResize(chart.update);
@@ -362,12 +370,15 @@ window.onbeforeunload = function() {
 			if (json !== null) {
 				//preparar json en formato que absorve el gráfico
 				for (var i = 0; i < json.length; i++) {
-					var v = new Object();
-					v.label = json[i].name;
-					v.value = json[i].size;
-					//v.color = '#00b19d';
-					v.key = json[i].id;
-					valuesToDataGrafico.push(v);
+					if (json[i].size != 0) {
+						var v = new Object();
+						v.label = json[i].name;
+						v.value = json[i].size;
+						//v.color = '#00b19d';
+						v.key = json[i].id;
+						valuesToDataGrafico.push(v);
+					}
+
 				}
 
 				//convertir el objeto Javascript a una expresión JSON
@@ -405,13 +416,15 @@ window.onbeforeunload = function() {
 			logg("transformadorData", "Numero de datos :" + json.length, 382);
 			//preparar json en formato que absorve el gráfico
 			for (var i = 0; i < json.length; i++) {
-				var v = new Object();
-				v.label = json[i].name;
-				v.value = json[i].size;
-				v.color = dame_color_aleatorio();
-				v.key = json[i].id;
+				if (json[i].size != 0) {
+					var v = new Object();
+					v.label = json[i].name;
+					v.value = json[i].size;
+					v.color = dame_color_aleatorio();
+					v.key = json[i].id;
+					valuesToDataGrafico.push(v);
+				}
 
-				valuesToDataGrafico.push(v);
 			}
 			//Agrego las propiedades key y values del objeto total
 			objDataGrafico.key = getNombreLegibleAttr1() + 'by Variants';
@@ -454,6 +467,7 @@ window.onbeforeunload = function() {
 		if (cadena === "flagWorkspace") {
 			if (flagWorkspace !== "wirecloud") {
 				settingToLocal();
+
 			} else {
 				settingToWirecloud();
 			}

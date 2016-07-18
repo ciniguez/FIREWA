@@ -1,0 +1,28 @@
+<link rel="import" href="../polymer.html">
+
+<dom-module id="list-datasources">
+
+	<template>
+		<div id="DatasourcesList-container" class="card-box">
+			<h2><a href="#">{{name}}</a></h2>
+			<div>
+				<span class="btnSelectAll"><a href="#">Select All</a></span>
+				<ul>
+					<!--li>
+						<div class="gdm-item-list">
+							<span class="titulo">1000 Genomes</span><span class="gdm-cantidad">
+								<input data-toggle="toggle" type="checkbox">
+							</span>
+						</div>
+					</li-->
+				</ul>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : 'list-datasources',
+			title : String
+		});
+	</script>
+</dom-module>

@@ -24,6 +24,6 @@
 	display: inline-block;
 	width:128px;
 	height:128px;
-	background-image: url('../images/technology.png');
+	background-image: url('../../images/technology.png');
 	background-repeat: repeat-x;
 }

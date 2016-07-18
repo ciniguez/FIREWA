@@ -10,7 +10,7 @@
 
 		<title>Minton - Responsive Admin Dashboard Template</title>
 
-		<link href="assets/plugins/nvd3/build/nv.d3.min.css" rel="stylesheet" type="text/css" />
+		<link href="../assets/nvd3/build/nv.d3.min.css" rel="stylesheet" type="text/css" />
 
 		<!--link href="assets/plugins/switchery/switchery.min.css" rel="stylesheet" /-->
 		<!--link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"-->
@@ -45,23 +45,11 @@
 						<div class="row">
 							<div class="col-sm-12">
 								<div class="card-box">
-									<h4 class="m-t-0 m-b-20 header-title"><b>Discrete Bar Chart</b></h4>
-
-									<div class="bar-chart">
-										<svg style="height:400px;width:100%"></svg>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="row">
-							<div class="col-sm-12">
-								<div class="card-box">
-									<h4 class="m-t-0 m-b-20 header-title"><b>Pie Chart &amp; Donut Chart</b></h4>
+									<!--h4 class="m-t-0 m-b-20 header-title"><b>Pie Chart &amp; Donut Chart</b></h4-->
 									<div class="row">
 										<div class="col-md-6">
 											<div id="chart1">
-												<svg style="height:500px;width:100%"></svg>
+												<svg style="height:300px;width:100%"></svg>
 											</div>
 										</div>
 
@@ -167,7 +155,7 @@
 
 			d3.select("#chart1 svg").datum(exampleData).transition().duration(350).call(chart);
 			nv.utils.windowResize(chart.update);
-
+			chart.tooltip.enabled();
 			chart.pie.dispatch.on("elementClick", function(e) {
 				var obj = [JSON.stringify(e.data.key)];
 				//Verificar conexión OPEN, si así se envía el objeto

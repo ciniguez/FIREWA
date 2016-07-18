@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>Pagina 1</title>
+	</head>
+	<body>
+		<iframe src="http://localhost:8000/admin/Genoma?mode=embedded" frameborder="0" allowfullscreen width="100%" height="800"></iframe>
+		<div id="bar-example"></div>
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/plugins/morris/morris.min.js"></script>
+		<script src="assets/plugins/raphael/raphael-min.js"></script>
+		<link rel="stylesheet" href="assets/plugins/morris/morris.css">
+		<script>
+			var datos = [{
+				y : '2006',
+				a : 100
+			}, {
+				y : '2007',
+				a : 75
+			}, {
+				y : '2008',
+				a : 50
+			}, {
+				y : '2009',
+				a : 75
+			}, {
+				y : '2010',
+				a : 50
+			}, {
+				y : '2011',
+				a : 75
+			}, {
+				y : '2012',
+				a : 100
+			}];
+			$(document).ready(function() {
+
+				var grap = Morris.Bar({
+					element : 'bar-example',
+					data : datos,
+					xkey : 'y',
+					ykeys : ['a'],
+					labels : ['Series A'],
+					hideHover : false,
+					resize : true,
+					barColors : function(row, series, type) {
+						//console.log("#AD1D"+ Math.floor((Math.random()*99)+10));
+						return "#AD1D"+ Math.floor((Math.random()*80)+10);
+					}
+				}).on('click', function(i, row) {
+					console.log(i, row);
+				});
+
+				setTimeout(function() {
+					grap.setData([{
+						y : '2006',
+						a : 100
+					}, {
+						y : '2007',
+						a : 75
+					}, {
+						y : '2008',
+						a : 50
+					}, {
+						y : '2009',
+						a : 10
+					}, {
+						y : '2010',
+						a : 50
+					}, {
+						y : '2011',
+						a : 75
+					}, {
+						y : '2012',
+						a : 100
+					}]);
+				}, 4000);
+			});
+
+		</script>
+	</body>
+</html>

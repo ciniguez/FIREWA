@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Implementation-Title: GemDomusServerFinal
+Implementation-Version: 0.0.1-SNAPSHOT
+Archiver-Version: Plexus Archiver
+Built-By: alberto
+Start-Class: com.gemdomus.GemDomusServerFinalApplication
+Implementation-Vendor-Id: com.gemdomus
+Spring-Boot-Version: 1.3.3.RELEASE
+Created-By: Apache Maven 3.3.3
+Build-Jdk: 1.8.0_74
+Implementation-Vendor: Pivotal Software, Inc.
+Main-Class: org.springframework.boot.loader.WarLauncher
+
