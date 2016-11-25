@@ -30,18 +30,25 @@ Note: List functionality is implemented using wiring to send  _messages_ to Filt
 
 SETTINGS
 - Url conecion: "ws://host:port/project_name/websocket_name"
-- Example: "ws://localhost:8080/WebSockets/websocket/chat"
+- Example 1: "ws://localhost:8080/WebSockets/websocket/chat"
+- Example 2: "ws://158.42.185.198:8080/gembiosoft"
+
 
 INPUT DATA FORMAT.
 	[
 	
-	 	{"id": id_item_1, "description": text_description,"calledVariations":null,"size":0},
+	 	{"id": id_item_1, "name": text_description,"size":null,"checked":0},
 	 	
-		{"id": id_item_2, "description": text_description,"calledVariations":null,"size":0}
+		{"id": id_item_1, "name": text_description,"size":null,"checked":0},
 		
-		{"id": id_item_3, "description": text_description,"calledVariations":null,"size":0}
+		{"id": id_item_1, "name": text_description,"size":null,"checked":0},
 		
 	]
+where: 
+id = Sample identifier
+name = Sample name
+size = number of variants inside the sample
+checked = State wheter the sample is considered in the analysis.
 	
 OUTPUT DATA FORMAT.
 

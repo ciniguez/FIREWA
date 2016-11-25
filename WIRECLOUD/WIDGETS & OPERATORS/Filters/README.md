@@ -33,5 +33,31 @@ Note: Filter functionality is implemented using wiring to receive _messages_ fro
 
 
 
+SETTINGS
+- Url conecion: "ws://host:port/project_name/websocket_name"
+- Example 1: "ws://localhost:8080/WebSockets/websocket/chat"
+- Example 2: "ws://158.42.185.198:8080/gembiosoft"
+
+
+INPUT DATA FORMAT.
+	[
+	
+	 	{"id": id_item_1, "name": text_description,"size":null,"checked":0},
+	 	
+		{"id": id_item_1, "name": text_description,"size":null,"checked":0},
+		
+		{"id": id_item_1, "name": text_description,"size":null,"checked":0},
+		
+	]
+where: 
+id = Sample identifier
+name = Sample name
+size = number of variants inside the sample
+checked = State wheter the sample is considered in the analysis.
+	
+OUTPUT DATA FORMAT.
+
+	[id_item_seleccionado_1,id_item_seleccionado_2,id_item_seleccionado_n ]
+	
 Credits:
 <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>

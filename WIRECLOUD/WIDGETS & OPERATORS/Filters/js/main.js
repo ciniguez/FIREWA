@@ -229,7 +229,7 @@ window.onbeforeunload = function() {
 		var idControl = wiringNameVariableRecibed + Math.floor(Math.random() * (1000 - 2)) + 2;
 
 		//Add to List, an element <li> with the data to be shown on screen
-		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.key + '">' + '<div class="label">' + label + ' (' + objInfo.label + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
+		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.id + '">' + '<div class="label">' + label + ' (' + objInfo.name + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
 
 		//Event assignment to Delete Command (inside <li>)
 		$("#item_" + idControl + " .btnDelete span").on("click", function() {

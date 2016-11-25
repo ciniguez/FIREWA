@@ -152,8 +152,8 @@ window.onbeforeunload = function() {
 
 	/**
 	 * Present UI on screen
-	 * @param data Datos para llenar en pantalla. La estructura de la
-	 * data debe ser igual a la indicada en la documentación de requerimientos.
+	 * @param data Datos para llenar en pantalla. La estructura de los datos
+	 * debe ser igual a la indicada en la documentación de requerimientos.
 	 */
 	function presentarDatos(data) {
 		//logg("presentar_datos", data, 173);
@@ -161,9 +161,15 @@ window.onbeforeunload = function() {
 		//Borro todo item de lista. Dejar limpia la lista
 		$('#list').empty();
 		//Por cada item en los datos se agrega un item de lista
+		var estadoCheckbox = "checked"; //variable para setear al chkbox su estado
 		for (var i = 0; i < data.length; i++) {
 			//logg("presentar_datos", "datos enviados: " + data[i], 107);
-			$("#list").append('<li>' + '<div id="item_' + data[i].id + '" data-id="' + data[i].id + '">' + '<div class="label">' + data[i].name + ' -- ' + data[i].size + '</div>' + '<div class="control">' + '<input class="chk" type="checkbox" checked value="' + data[i].id + '">' + '</div></div>' + '</li>');
+			if(data[i].checked){
+				estadoCheckbox = "checked";	
+			}else{
+				estadoCheckbox = "";
+			}
+			$("#list").append('<li>' + '<div id="item_' + data[i].id + '" data-id="' + data[i].id + '">' + '<div class="label">' + data[i].name + ' -- ' + data[i].count + '</div>' + '<div class="control">' + '<input class="chk" type="checkbox" '+ estadoCheckbox + ' value="' + data[i].id + '">' + '</div></div>' + '</li>');
 		}
 
 		$('.chk').on("change", function() {
