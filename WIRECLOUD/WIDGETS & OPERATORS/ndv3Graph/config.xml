@@ -16,7 +16,7 @@
 	<contents src="index.html" useplatformstyle="true"/>
 	<rendering width="5" height="10"/>
 	<preferences>
-		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="ws://158.42.185.198:8080/graphws2" />
+		<preference name="urlServicio" type="text" label="Service URL" description="URL to the service List" default="ws://158.42.185.198:8080/gembiosoft" />
 		<preference name="flagWorkspace" type="list" label="Worksapace :" description="Environment upon which it works" default="local">
 			<option label="Local-Simple HTML" value="local"/>
 			<option label="Wirecloud" value="wirecloud"/>

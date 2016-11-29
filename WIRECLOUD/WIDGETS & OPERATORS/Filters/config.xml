@@ -16,7 +16,7 @@
 	<contents src="index.html" useplatformstyle="true"/>
 	<rendering width="4" height="22"/>
 	<preferences>
-		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="ws://158.42.185.198:8080/graphws2" />
+		<preference name="urlServicio" type="text" label="WebSocket URL" description="URL to the service List" default="ws://158.42.185.198:8080/gembiosoft" />
 		<preference name="environment" type="list" label="Environment :" description="Production or development" default="dev">
 			<option label="Development" value="dev"/>
 			<option label="Production" value="prod"/>

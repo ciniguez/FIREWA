@@ -179,6 +179,7 @@ window.onbeforeunload = function() {
 	 */
 	var handlerSlotChr = function(itemString) {
 		if (itemString !== "" || itemString !== null) {
+			logg("handlerSlotChr", itemString);
 			presentarDatos("inChr", itemString);
 		} else {
 			logg("handlerSlot", "No existe emparejamiento con la preferencia solicitada", 357);
@@ -197,6 +198,54 @@ window.onbeforeunload = function() {
 		}
 	};
 	/**
+	 * Set the initial state of the filter.
+	 * This function is just connected when the Filter is created in the Dashboard.
+	 * @param estadoFiltros Objeto o Array proveniente del servidor y enviado a través de websocket.js
+	 * @autor ciniguez (28 nov 2016)
+	 */
+	function estadoInicial(estadoFiltros) {
+		var arrayNameFilters = ["chromosomeIds", "phenotypeIds", "clinicalSignificanceIds"];
+		var indice;
+		var identificadorCategoriaFiltro;
+		// identificador
+		var objFiltro;
+		//array para almacenar el grupo de filtros
+		var objInfoJSONText = new Object();
+		var nameFilter;
+		
+		for (indice in arrayNameFilters) {
+			nameFilter = arrayNameFilters[indice];
+			switch(nameFilter) {
+			case "chromosomeIds":
+				identificadorCategoriaFiltro = "inChr";
+				break;
+			case "phenotypeIds":
+				identificadorCategoriaFiltro = "inPheno";
+				break;
+			case "clinicalSignificanceIds":
+				identificadorCategoriaFiltro = "inClinical";
+				break;
+			}
+			//logg("estadoInicial", JSON.stringify(estadoFiltros[nameFilter]), 232);
+
+			//Obtengo el array de filtros de la categoría
+			objFiltro = estadoFiltros[nameFilter];
+
+			for (var i = 0; i < objFiltro.length; i++) {
+				//formo el objeto que se adapte a la funcion presentarDatos.
+				for (indice in objFiltro) {
+					//Cualquier numero (colo para cumplir con el formato general)
+					objInfoJSONText.id = 0;
+					//el nombre del filtro (no opcional!)
+					objInfoJSONText.label = objFiltro[indice];
+				}
+				presentarDatos(identificadorCategoriaFiltro, JSON.stringify(objInfoJSONText));
+			}
+		}
+
+	}
+
+	/**
 	 * Show data on screen
 	 * @param wiringNameVariableRecibed Variable name to identify the data type to present.
 	 * @param objInfoJSONText A string which represent an JSON object (id, label, value), it is the information to show.
@@ -206,7 +255,7 @@ window.onbeforeunload = function() {
 		var label = "";
 		var id = "all";
 		var objInfo = JSON.parse(objInfoJSONText);
-
+		logg("presentarDatos", objInfo, 259);
 		switch(wiringNameVariableRecibed) {
 		case "inChr":
 			label = "Chromosome ";
@@ -229,7 +278,7 @@ window.onbeforeunload = function() {
 		var idControl = wiringNameVariableRecibed + Math.floor(Math.random() * (1000 - 2)) + 2;
 
 		//Add to List, an element <li> with the data to be shown on screen
-		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.id + '">' + '<div class="label">' + label + ' (' + objInfo.name + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
+		$("#list").append('<li>' + '<div id="item_' + idControl + '" data-variable="' + id + '" data-id="' + objInfo.label + '">' + '<div class="label">' + label + ' (' + objInfo.label + ')</div>' + '<div class="btnDelete control"><span>Delete</span></div>' + '</div>' + '</li>');
 
 		//Event assignment to Delete Command (inside <li>)
 		$("#item_" + idControl + " .btnDelete span").on("click", function() {
@@ -291,7 +340,7 @@ window.onbeforeunload = function() {
 		if (getIdentificadorWebSocket() !== null && url !== null) {
 			if (ws === null) {
 				logg("crearWebSocket", "Connecting through WebSocket with: " + url, 423);
-				ws = new MODELO.websocket(url, noData, noData, identificadorWebSocket);
+				ws = new MODELO.websocket(url, estadoInicial, noData, identificadorWebSocket);
 			} else {
 				logg("crearWebSocket", "There already is an open websocket", 315);
 			}

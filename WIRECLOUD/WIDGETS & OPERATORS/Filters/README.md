@@ -39,25 +39,22 @@ SETTINGS
 - Example 2: "ws://158.42.185.198:8080/gembiosoft"
 
 
-INPUT DATA FORMAT.
-	[
+INPUT DATA FORMAT (NOTA: Unicamente se recibe en la creación del componente, más no en su ejecución).
 	
-	 	{"id": id_item_1, "name": text_description,"size":null,"checked":0},
-	 	
-		{"id": id_item_1, "name": text_description,"size":null,"checked":0},
-		
-		{"id": id_item_1, "name": text_description,"size":null,"checked":0},
-		
+	[
+	 	chromosome{"nombre_chromosoma1","nombre_chromosoma2",..."nombre_chromosomaN"},	
+		phenotype{"nombre_phenotype1", "nombre_phenotype2",...,"nombre_phenotypeN"},
+		clinicalSignificance{"clinicalSignificance1","clinicalSignificance2",..., "clinicalSignificanceN"},
 	]
-where: 
-id = Sample identifier
-name = Sample name
-size = number of variants inside the sample
-checked = State wheter the sample is considered in the analysis.
 	
 OUTPUT DATA FORMAT.
 
-	[id_item_seleccionado_1,id_item_seleccionado_2,id_item_seleccionado_n ]
+	[id,type]
+where: 
+
+id = nombre del item seleccionado
+
+type = Cadena de Texto que identifica el grupo al que pertenece el item seleccionado. Puede tomar 1 de los siguientes valores ("chromosome","phenotype", "clinicalsignificance", "all").
 	
 Credits:
 <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>

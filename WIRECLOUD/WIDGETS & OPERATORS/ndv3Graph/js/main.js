@@ -294,7 +294,12 @@ window.onbeforeunload = function() {
 		}
 		//Verificar conexión OPEN, si así se envía el objeto
 		if (ws.conn.readyState == 1) {
-			ws.conn.send(objData.key);
+			// ANTES
+			//ws.conn.send(objData.key); 
+					
+			//DESPUES (pedido por Alberto el 29 de nov 2016)
+			ws.conn.send(JSON.stringify({"id":objData.label}));
+			
 		} else {
 			logg("pieChart", "Imposible enviar, la conexión tiene estado: " + ws.conn.readyState, 269);
 		}

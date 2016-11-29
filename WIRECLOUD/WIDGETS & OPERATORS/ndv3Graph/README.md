@@ -32,10 +32,12 @@ Finally, users place graphs on wirecloud dashboard.
 
 SETTINGS
 Url conecion: "ws://host:port/project_name/websocket_name"
-Example: "ws://localhost:8080/WebSockets/websocket/chat" o "ws://158.42.185.198:8080/graphws"
+Example: "ws://localhost:8080/WebSockets/websocket/chat" o "ws://158.42.185.198:8080/gembiosoft"
 
 INPUT DATA AND OUTPUT DATA
+
 DISCRETE BAR CHART IN:
+
 [
 	{
 		"id":1,
@@ -48,8 +50,11 @@ DISCRETE BAR CHART IN:
 		"size":12
 	}
 ]
+
 DISCRETE BAR CHART OUT:
+
 	["id_item_seleccionado"]
+	
 //----------------------------------------------
 PIE CHART IN:
 [
@@ -62,5 +67,7 @@ PIE CHART IN:
        "value" : 0
     } , 
 ]
+
 PIE CHART OUT:
-	["id_item_seleccionado"]
+
+	["name_item_seleccionado"]

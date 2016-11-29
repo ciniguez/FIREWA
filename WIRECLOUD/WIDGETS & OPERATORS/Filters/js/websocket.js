@@ -26,11 +26,11 @@ var MODELO = {
 				try {
 					var json = JSON.parse(e.data);
 					if ( nameFunctionCallback instanceof Function && nameFunctionCallbackError instanceof Function) {
-						if ( json instanceof Object) {
+						if ( json instanceof Object || json instanceof Array) {
 							//Se envia los datos a la funcion respectiva (callback)
 							nameFunctionCallback(json);
 						}else{
-							nameFunctionCallbackError("El dato enviado por servidor no es un Objeto =>" + json);
+							nameFunctionCallbackError("El dato enviado por servidor no es un Objeto o Array =>" + json);
 							//Se envia los datos a la funcion respectiva (callback) con null
 							nameFunctionCallback(null);
 						}
